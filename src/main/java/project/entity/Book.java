@@ -1,14 +1,16 @@
 package project.entity;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Book {
+    private static final AtomicInteger count = new AtomicInteger(0);
     private int id;
     private String name;
     private String author;
 
-    public Book(int id, String name, String author) {
-        this.id = id;
+    public Book(String name, String author) {
+        this.id = count.incrementAndGet();
         this.name = name;
         this.author = author;
     }
