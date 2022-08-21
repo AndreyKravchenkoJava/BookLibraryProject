@@ -1,28 +1,26 @@
 package project.service;
 
+import project.dao.*;
 import project.entity.Book;
 import project.entity.Reader;
-import project.repository.BookRepository;
-import project.repository.LibraryRepository;
-import project.repository.ReaderRepository;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class LibraryService {
-    private LibraryRepository libraryRepository = new LibraryRepository();
-    private BookRepository bookRepository = new BookRepository();
-    private ReaderRepository readerRepository = new ReaderRepository();
+    private LibraryDAOImpl libraryDAOImpl = new LibraryDAOImpl();
+    private BookDAOImpl bookDAOImpl = new BookDAOImpl();
+    private ReaderDAOImpl readerDAOImpl = new ReaderDAOImpl();
 
     public void showBooks() {
-        System.out.println(bookRepository.findAll());
+        System.out.println(bookDAOImpl.findAll());
     }
 
     public void showReaders() {
-        System.out.println(readerRepository.findAll());
+        System.out.println(readerDAOImpl.findAll());
     }
 
     public void addBook() {
@@ -36,7 +34,7 @@ public class LibraryService {
         Matcher matcher = pattern.matcher(nameAndAuthorArray[1]);
 
         if (matcher.find()) {
-            bookRepository.save(new Book(nameAndAuthorArray[0], nameAndAuthorArray[1]));
+            bookDAOImpl.save(new Book(nameAndAuthorArray[0], nameAndAuthorArray[1]));
         } else {
             System.out.println("Name must contain only letters and have more than two letters");
         }
@@ -52,7 +50,7 @@ public class LibraryService {
         Matcher matcher = pattern.matcher(input);
 
         if (matcher.find()) {
-            readerRepository.save(new Reader(input));
+            readerDAOImpl.save(new Reader(input));
         } else {
             System.out.println("Name must contain only letters and have more than two letters");
         }
@@ -67,28 +65,19 @@ public class LibraryService {
         int bookId = arrayIndicators[0];
         int readerId = arrayIndicators[1];
 
-        Book bookToBorrow = bookRepository.findBookById(bookId);
-        Reader newBorrowed = readerRepository.findReaderById(readerId);
-
-        libraryRepository.borrowBookToReader(bookToBorrow, newBorrowed);
-        bookRepository.delete(bookToBorrow);
+        libraryDAOImpl.save(bookId, readerId);
     }
 
     public void returnBookToLibrary() {
-        System.out.println("Please enter bookId to return the book to the library");
+        System.out.println("Please enter bookId and readerId to return the book to the library. Like this: bookId / readerId");
 
         Scanner scanner = new Scanner(System.in);
-        int input = scanner.nextInt();
-        Book returningBook = new Book();
+        String input = scanner.nextLine();
+        int[] bookIDAndReaderId = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
+        int bookId = bookIDAndReaderId[0];
+        int readerId= bookIDAndReaderId[1];
 
-        for (Book book : libraryRepository.findAll().keySet()) {
-            if (book.getId() == input) {
-                returningBook = book;
-            }
-        }
-
-        libraryRepository.findAll().remove(returningBook);
-        bookRepository.save(returningBook);
+        libraryDAOImpl.delete(bookId, readerId);
     }
 
     public void showAllBorrowedBooksUser() {
@@ -97,7 +86,9 @@ public class LibraryService {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
 
-        System.out.println(libraryRepository.findAll().entrySet().stream().filter(r -> r.getValue().getId() == input).collect(Collectors.toList()));
+        List<Book> bookList = libraryDAOImpl.getReaderBorrowedBook(input);
+
+        System.out.println(bookList);
     }
 
     public void showReadersCurrentBook() {
@@ -106,6 +97,12 @@ public class LibraryService {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
 
-        System.out.println(libraryRepository.findAll().entrySet().stream().filter(b -> b.getKey().getId() == input).collect(Collectors.toList()));
+        List<Reader> readerList = libraryDAOImpl.getReadersByCurrentBook(input);
+
+        System.out.println(readerList);
+    }
+
+    public void showAllReadersAndBorrowedBook() {
+        System.out.println(libraryDAOImpl.getAllReadersAndBorrowedBook());
     }
 }

@@ -1,22 +1,24 @@
 package project.entity;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Book {
-    private static final AtomicInteger count = new AtomicInteger(0);
     private int id;
-    private String name;
+    private String title;
     private String author;
 
-    public Book(String name, String author) {
-        this.id = count.incrementAndGet();
-        this.name = name;
+    public Book(int id, String title, String author) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+    }
+
+    public Book(String title, String author) {
+        this.title = title;
         this.author = author;
     }
 
     public Book() {
-
     }
 
     public int getId() {
@@ -27,12 +29,12 @@ public class Book {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getAuthor() {
@@ -48,19 +50,19 @@ public class Book {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return id == book.id && Objects.equals(name, book.name) && Objects.equals(author, book.author);
+        return id == book.id && Objects.equals(title, book.title) && Objects.equals(author, book.author);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, author);
+        return Objects.hash(id, title, author);
     }
 
     @Override
     public String toString() {
         return "Book{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", title='" + title + '\'' +
                 ", author='" + author + '\'' +
                 '}';
     }

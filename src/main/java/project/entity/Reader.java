@@ -1,15 +1,18 @@
 package project.entity;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Reader {
-    private static final AtomicInteger count = new AtomicInteger(0);
     private int id;
     private String name;
 
     public Reader(String name) {
-        this.id = count.incrementAndGet();
+        this.id = id;
+        this.name = name;
+    }
+
+    public Reader(int id, String name) {
+        this.id = id;
         this.name = name;
     }
 

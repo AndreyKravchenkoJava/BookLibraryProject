@@ -30,6 +30,7 @@ public class ConsoleUI {
             case "6" -> libraryService.returnBookToLibrary();
             case "7" -> libraryService.showAllBorrowedBooksUser();
             case "8" -> libraryService.showReadersCurrentBook();
+            case "9" -> libraryService.showAllReadersAndBorrowedBook();
             case "exit" -> {
                 System.out.println("Goodbye!");
                 System.exit(0);
@@ -52,6 +53,7 @@ public class ConsoleUI {
         System.out.println("[6] Return a book to the library");
         System.out.println("[7] Show all borrowed book by user Id");
         System.out.println("[8] Show current reader of a book with Id");
+        System.out.println("[9] Show all readers and borrowed book");
         System.out.println("");
         System.out.println("Type 'exit' to stop program and exit!");
     }
