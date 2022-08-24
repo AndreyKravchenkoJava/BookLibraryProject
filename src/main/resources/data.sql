@@ -15,16 +15,16 @@ reader_id INT REFERENCES reader(id),
 CONSTRAINT book_reader_pkey PRIMARY KEY(book_id, reader_id)
 )
 
-INSERT INTO book(name, author) VALUES('Java From Epam', 'Igor Blinov');
-INSERT INTO book(name, author) VALUES('The Art of Loving', 'Erich Fromm');
-INSERT INTO book(name, author) VALUES('The Subtle Art of Not Giving a Fuck', 'Mark Manson');
-INSERT INTO book(name, author) VALUES('No Brakes: My Top Gear Years', 'Jeremy Clarkson');
-INSERT INTO book(name, author) VALUES('Change or die', 'John Brandon');
-INSERT INTO book(name, author) VALUES('The Last Wish', 'Andrzej Sapkowski');
-INSERT INTO book(name, author) VALUES('Season of Storms', 'Andrzej Sapkowski');
-INSERT INTO book(name, author) VALUES('Women', 'Charles Bukowski');
-INSERT INTO book(name, author) VALUES('Ninety-Three', 'Victor Hugo');
-INSERT INTO book(name, author) VALUES('How to Stop Worrying and Start Living', 'Dale Carnegie');
+INSERT INTO book(title, author) VALUES('Java From Epam', 'Igor Blinov');
+INSERT INTO book(title, author) VALUES('The Art of Loving', 'Erich Fromm');
+INSERT INTO book(title, author) VALUES('The Subtle Art of Not Giving a Fuck', 'Mark Manson');
+INSERT INTO book(title, author) VALUES('No Brakes: My Top Gear Years', 'Jeremy Clarkson');
+INSERT INTO book(title, author) VALUES('Change or die', 'John Brandon');
+INSERT INTO book(title, author) VALUES('The Last Wish', 'Andrzej Sapkowski');
+INSERT INTO book(title, author) VALUES('Season of Storms', 'Andrzej Sapkowski');
+INSERT INTO book(title, author) VALUES('Women', 'Charles Bukowski');
+INSERT INTO book(title, author) VALUES('Ninety-Three', 'Victor Hugo');
+INSERT INTO book(title, author) VALUES('How to Stop Worrying and Start Living', 'Dale Carnegie');
 
 INSERT INTO reader(name) VALUES('Andrey Kravchenko');
 INSERT INTO reader(name) VALUES('Danil Kolyagin');
