@@ -1,6 +1,6 @@
 CREATE TABLE book(
 id SERIAL PRIMARY KEY,
-name VARCHAR(100),
+title VARCHAR(100),
 author VARCHAR(100)
 )
 
