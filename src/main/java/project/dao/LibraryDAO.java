@@ -10,11 +10,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public class LibraryDAOImpl {
+public class LibraryDAO {
 
     public boolean save(int bookID, int readerId) {
         boolean flag = false;
-        final String SQL_SAVE_BORROWING = "INSERT INTO book_reader(book_id, reader_id) VALUES((?,?)";
+        final String SQL_SAVE_BORROWING = "INSERT INTO book_reader(book_id, reader_id) VALUES(?,?)";
 
         try (Connection connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_BORROWING)) {
@@ -29,18 +29,6 @@ public class LibraryDAOImpl {
             throwables.printStackTrace();
         }
         return flag;
-    }
-
-    public List findAll() {
-        return null;
-    }
-
-    public Optional findById(int id) {
-        return Optional.empty();
-    }
-
-    public Object update(Object object) {
-        return null;
     }
 
     public boolean delete(int bookId, int readerId) {
@@ -64,10 +52,9 @@ public class LibraryDAOImpl {
 
     public List<Book> getReaderBorrowedBook(int readerId) {
         List<Book> bookList = new ArrayList<>();
-        final String SQL_GET_READER_BORROWED_BOOK = "SELECT book.id, book.title, book.author FROM reader, book JOIN book_reader \n" +
-                "ON book_reader.book_id = book.id WHERE reader.id = book_reader.reader_id\n" +
-                "AND reader.id = (?)\n" +
-                "ORDER BY reader.id";
+        final String SQL_GET_READER_BORROWED_BOOK = "SELECT book.id AS book_id, book.title, book.author FROM book \n" +
+                "JOIN book_reader ON book_reader.book_id = book.id \n" +
+                "WHERE book_reader.reader_id = (?)";
 
         try (Connection connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_GET_READER_BORROWED_BOOK)) {
@@ -88,9 +75,9 @@ public class LibraryDAOImpl {
 
     public List<Reader> getReadersByCurrentBook(int bookId) {
         List<Reader> readerList = new ArrayList<>();
-        final String SQL_GET_READERS_BY_CURRENT_BOOK = "SELECT reader.id, reader.name FROM reader, book JOIN book_reader \n" +
-                "ON book_reader.book_id = book.id WHERE reader.id = book_reader.reader_id\n" +
-                "AND book.id = (?)\n" +
+        final String SQL_GET_READERS_BY_CURRENT_BOOK = "SELECT reader.id, reader.name FROM reader JOIN book_reader\n" +
+                "ON book_reader.reader_id = reader.id \n" +
+                "WHERE book_reader.book_id = (?)\n" +
                 "ORDER BY reader.id";
 
         try (Connection connection = ConnectionCreator.createConnection();
@@ -111,11 +98,8 @@ public class LibraryDAOImpl {
     }
 
     public Map<Reader, List<Book>> getAllReadersAndBorrowedBook() {
-        // не понимаю как реализовать. Могу правильно вывести только читателей, но не их книги.
-        // В голову лезет решение через какой-нибудь цикл for и поиск для каждого читателя его книг, но мне кажется это костыль, и можно сделать проще.
-        // Понимаю что не сделал его правильно, но почему-то для каждого читателя выводится его последняя заимствованная книга.
         Map<Reader, List<Book>> readerListMap = new HashMap<>();
-        final String SQL_GET_ALL_READERS_AND_BORROWED_BOOK = "SELECT reader.id, reader.name, book.id, book.title, book.author \n" +
+        final String SQL_GET_ALL_READERS_AND_BORROWED_BOOK = "SELECT reader.id, reader.name, book.id AS book_id, book.title, book.author \n" +
                 "FROM reader, book JOIN book_reader \n" +
                 "ON book_reader.book_id = book.id WHERE reader.id = book_reader.reader_id";
 
@@ -124,10 +108,18 @@ public class LibraryDAOImpl {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
+
             while (resultSet.next()) {
-                List<Book> bookList = new ArrayList<>();
-                bookList.add(getBorrowedBook(resultSet));
-                readerListMap.put(getBorrowedReader(resultSet), bookList);
+                Reader reader = getBorrowedReader(resultSet);
+                Book book = getBorrowedBook(resultSet);
+
+                if (readerListMap.keySet().contains(reader)) {
+                    readerListMap.get(reader).add(book);
+                } else {
+                    List<Book> books = new ArrayList<>();
+                    books.add(book);
+                    readerListMap.put(reader, books);
+                }
             }
 
         } catch (SQLException throwables) {
@@ -156,7 +148,7 @@ public class LibraryDAOImpl {
         Book book = new Book();
 
         try {
-            int id = resultSet.getInt("id");
+            int id = resultSet.getInt("book_id");
             String title = resultSet.getString("title");
             String author = resultSet.getString("author");
 

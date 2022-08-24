@@ -7,7 +7,6 @@ public class Reader {
     private String name;
 
     public Reader(String name) {
-        this.id = id;
         this.name = name;
     }
 

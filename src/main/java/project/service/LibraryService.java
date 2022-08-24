@@ -11,16 +11,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LibraryService {
-    private LibraryDAOImpl libraryDAOImpl = new LibraryDAOImpl();
-    private BookDAOImpl bookDAOImpl = new BookDAOImpl();
-    private ReaderDAOImpl readerDAOImpl = new ReaderDAOImpl();
+    private LibraryDAO libraryDAO = new LibraryDAO();
+    private BookDAO bookDAO = new BookDAO();
+    private ReaderDAO readerDAO = new ReaderDAO();
 
     public void showBooks() {
-        System.out.println(bookDAOImpl.findAll());
+        System.out.println(bookDAO.findAll());
     }
 
     public void showReaders() {
-        System.out.println(readerDAOImpl.findAll());
+        System.out.println(readerDAO.findAll());
     }
 
     public void addBook() {
@@ -30,11 +30,11 @@ public class LibraryService {
         String input = scanner.nextLine();
         String[] nameAndAuthorArray = input.split(" / ");
 
-        Pattern pattern = Pattern.compile("^[a-zA-Z]{2,}$");
+        Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
         Matcher matcher = pattern.matcher(nameAndAuthorArray[1]);
 
         if (matcher.find()) {
-            bookDAOImpl.save(new Book(nameAndAuthorArray[0], nameAndAuthorArray[1]));
+            bookDAO.save(new Book(nameAndAuthorArray[0], nameAndAuthorArray[1]));
         } else {
             System.out.println("Name must contain only letters and have more than two letters");
         }
@@ -46,11 +46,11 @@ public class LibraryService {
 
         String input = scanner.nextLine();
 
-        Pattern pattern = Pattern.compile("^[a-zA-Z]{2,}$");
+        Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
         Matcher matcher = pattern.matcher(input);
 
         if (matcher.find()) {
-            readerDAOImpl.save(new Reader(input));
+            readerDAO.save(new Reader(input));
         } else {
             System.out.println("Name must contain only letters and have more than two letters");
         }
@@ -65,7 +65,7 @@ public class LibraryService {
         int bookId = arrayIndicators[0];
         int readerId = arrayIndicators[1];
 
-        libraryDAOImpl.save(bookId, readerId);
+        libraryDAO.save(bookId, readerId);
     }
 
     public void returnBookToLibrary() {
@@ -77,7 +77,7 @@ public class LibraryService {
         int bookId = bookIDAndReaderId[0];
         int readerId= bookIDAndReaderId[1];
 
-        libraryDAOImpl.delete(bookId, readerId);
+        libraryDAO.delete(bookId, readerId);
     }
 
     public void showAllBorrowedBooksUser() {
@@ -86,7 +86,7 @@ public class LibraryService {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
 
-        List<Book> bookList = libraryDAOImpl.getReaderBorrowedBook(input);
+        List<Book> bookList = libraryDAO.getReaderBorrowedBook(input);
 
         System.out.println(bookList);
     }
@@ -97,12 +97,12 @@ public class LibraryService {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
 
-        List<Reader> readerList = libraryDAOImpl.getReadersByCurrentBook(input);
+        List<Reader> readerList = libraryDAO.getReadersByCurrentBook(input);
 
         System.out.println(readerList);
     }
 
     public void showAllReadersAndBorrowedBook() {
-        System.out.println(libraryDAOImpl.getAllReadersAndBorrowedBook());
+        System.out.println(libraryDAO.getAllReadersAndBorrowedBook());
     }
 }
