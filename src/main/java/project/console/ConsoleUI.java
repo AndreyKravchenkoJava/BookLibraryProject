@@ -13,13 +13,13 @@ public class ConsoleUI {
         System.out.println("Welcome to the library!");
 
         while (true) {
-            getCover();
+            runLibrary();
         }
     }
 
-    private void getCover() {
-        getMessage();
-        String choice = getChoice();
+    private void runLibrary() {
+        showMainMenu();
+        String choice = scanner.nextLine();
 
         switch (choice) {
             case "1" -> libraryService.showBooks();
@@ -38,23 +38,18 @@ public class ConsoleUI {
         }
     }
 
-    private String getChoice() {
-        return String.valueOf(scanner.next());
-    }
-
-
-    private void getMessage() {
-        System.out.println("Please, select one of the following actions by typing the option's number and pressing Enter key: ");
-        System.out.println("[1] Show all books in the library");
-        System.out.println("[2] Show all readers registered in the library");
-        System.out.println("[3] Register new reader");
-        System.out.println("[4] Add new book");
-        System.out.println("[5] Borrow a book to a reader");
-        System.out.println("[6] Return a book to the library");
-        System.out.println("[7] Show all borrowed book by user Id");
-        System.out.println("[8] Show current reader of a book with Id");
-        System.out.println("[9] Show all readers and borrowed book");
-        System.out.println("");
-        System.out.println("Type 'exit' to stop program and exit!");
+    private void showMainMenu() {
+        System.out.println("Please, select one of the following actions by typing the option's number and pressing Enter key:\n" +
+                "[1] Show all books in the library\n" +
+                "[2] Show all readers registered in the library\n" +
+                "[3] Register new reader\n" +
+                "[4] Add new book\n" +
+                "[5] Borrow a book to a reader\n" +
+                "[6] Return a book to the library\n" +
+                "[7] Show all borrowed book by user Id\n" +
+                "[8] Show current reader of a book with Id\n" +
+                "[9] Show all readers and borrowed book\n" +
+                "\n" +
+                "Type 'exit' to stop program and exit!");
     }
 }

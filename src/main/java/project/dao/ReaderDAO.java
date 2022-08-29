@@ -40,7 +40,7 @@ public class ReaderDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                readerList.add(getReader(resultSet));
+                readerList.add(mapToReader(resultSet));
             }
 
         } catch (SQLException throwables) {
@@ -49,7 +49,7 @@ public class ReaderDAO {
         return readerList;
     }
 
-    private Reader getReader(ResultSet resultSet) {
+    private Reader mapToReader(ResultSet resultSet) {
         Reader reader = new Reader();
 
         try {

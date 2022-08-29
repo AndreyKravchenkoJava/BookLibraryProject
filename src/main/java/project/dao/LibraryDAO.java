@@ -12,7 +12,7 @@ import java.util.*;
 
 public class LibraryDAO {
 
-    public boolean save(int bookID, int readerId) {
+    public boolean borrowBookIdToReaderId(int bookID, int readerId) {
         boolean flag = false;
         final String SQL_SAVE_BORROWING = "INSERT INTO book_reader(book_id, reader_id) VALUES(?,?)";
 
@@ -31,7 +31,7 @@ public class LibraryDAO {
         return flag;
     }
 
-    public boolean delete(int bookId, int readerId) {
+    public boolean returnBookIdFromReaderId(int bookId, int readerId) {
         boolean flag = false;
         final String SQL_DELETE_BORROWING = "DELETE FROM book_reader WHERE book_id = (?) AND reader_id = (?)";
 
@@ -50,7 +50,7 @@ public class LibraryDAO {
         return flag;
     }
 
-    public List<Book> getReaderBorrowedBook(int readerId) {
+    public List<Book> findAllBorrowedBooksByReaderId(int readerId) {
         List<Book> bookList = new ArrayList<>();
         final String SQL_GET_READER_BORROWED_BOOK = "SELECT book.id AS book_id, book.title, book.author FROM book \n" +
                 "JOIN book_reader ON book_reader.book_id = book.id \n" +
@@ -64,7 +64,7 @@ public class LibraryDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                bookList.add(getBorrowedBook(resultSet));
+                bookList.add(mapToBorrowedBook(resultSet));
             }
 
         } catch (SQLException throwables) {
@@ -73,7 +73,7 @@ public class LibraryDAO {
         return bookList;
     }
 
-    public List<Reader> getReadersByCurrentBook(int bookId) {
+    public List<Reader> findAllReadersByBookId(int bookId) {
         List<Reader> readerList = new ArrayList<>();
         final String SQL_GET_READERS_BY_CURRENT_BOOK = "SELECT reader.id, reader.name FROM reader JOIN book_reader\n" +
                 "ON book_reader.reader_id = reader.id \n" +
@@ -88,7 +88,7 @@ public class LibraryDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                readerList.add(getBorrowedReader(resultSet));
+                readerList.add(mapToReader(resultSet));
             }
 
         } catch (SQLException throwables) {
@@ -97,7 +97,7 @@ public class LibraryDAO {
         return readerList;
     }
 
-    public Map<Reader, List<Book>> getAllReadersAndBorrowedBook() {
+    public Map<Reader, List<Book>> findAllReadersAndBorrowedBooks() {
         Map<Reader, List<Book>> readerListMap = new HashMap<>();
         final String SQL_GET_ALL_READERS_AND_BORROWED_BOOK = "SELECT reader.id, reader.name, book.id AS book_id, book.title, book.author \n" +
                 "FROM reader, book JOIN book_reader \n" +
@@ -110,8 +110,8 @@ public class LibraryDAO {
 
 
             while (resultSet.next()) {
-                Reader reader = getBorrowedReader(resultSet);
-                Book book = getBorrowedBook(resultSet);
+                Reader reader = mapToReader(resultSet);
+                Book book = mapToBorrowedBook(resultSet);
 
                 if (readerListMap.keySet().contains(reader)) {
                     readerListMap.get(reader).add(book);
@@ -128,7 +128,7 @@ public class LibraryDAO {
         return readerListMap;
     }
 
-    private Reader getBorrowedReader(ResultSet resultSet) {
+    private Reader mapToReader(ResultSet resultSet) {
         Reader reader = new Reader();
 
         try {
@@ -144,7 +144,7 @@ public class LibraryDAO {
         return reader;
     }
 
-    private Book getBorrowedBook(ResultSet resultSet) {
+    private Book mapToBorrowedBook(ResultSet resultSet) {
         Book book = new Book();
 
         try {

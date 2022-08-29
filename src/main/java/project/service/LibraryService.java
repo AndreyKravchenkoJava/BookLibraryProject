@@ -16,11 +16,11 @@ public class LibraryService {
     private ReaderDAO readerDAO = new ReaderDAO();
 
     public void showBooks() {
-        System.out.println(bookDAO.findAll());
+        bookDAO.findAll().forEach(System.out::println);
     }
 
     public void showReaders() {
-        System.out.println(readerDAO.findAll());
+        readerDAO.findAll().forEach(System.out::println);
     }
 
     public void addBook() {
@@ -65,7 +65,7 @@ public class LibraryService {
         int bookId = arrayIndicators[0];
         int readerId = arrayIndicators[1];
 
-        libraryDAO.save(bookId, readerId);
+        libraryDAO.borrowBookIdToReaderId(bookId, readerId);
     }
 
     public void returnBookToLibrary() {
@@ -77,7 +77,7 @@ public class LibraryService {
         int bookId = bookIDAndReaderId[0];
         int readerId= bookIDAndReaderId[1];
 
-        libraryDAO.delete(bookId, readerId);
+        libraryDAO.returnBookIdFromReaderId(bookId, readerId);
     }
 
     public void showAllBorrowedBooksUser() {
@@ -86,9 +86,9 @@ public class LibraryService {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
 
-        List<Book> bookList = libraryDAO.getReaderBorrowedBook(input);
+        List<Book> bookList = libraryDAO.findAllBorrowedBooksByReaderId(input);
 
-        System.out.println(bookList);
+        bookList.forEach(System.out::println);
     }
 
     public void showReadersCurrentBook() {
@@ -97,12 +97,12 @@ public class LibraryService {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
 
-        List<Reader> readerList = libraryDAO.getReadersByCurrentBook(input);
+        List<Reader> readerList = libraryDAO.findAllReadersByBookId(input);
 
-        System.out.println(readerList);
+        readerList.forEach(System.out::println);
     }
 
     public void showAllReadersAndBorrowedBook() {
-        System.out.println(libraryDAO.getAllReadersAndBorrowedBook());
+        libraryDAO.findAllReadersAndBorrowedBooks().forEach((k, v) -> System.out.println(k + " : " + v));
     }
 }

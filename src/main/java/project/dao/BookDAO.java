@@ -42,7 +42,7 @@ public class BookDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                bookList.add(getBook(resultSet));
+                bookList.add(mapToBook(resultSet));
             }
 
         } catch (SQLException throwables) {
@@ -51,7 +51,7 @@ public class BookDAO {
         return bookList;
     }
 
-    private Book getBook(ResultSet resultSet) {
+    private Book mapToBook(ResultSet resultSet) {
         Book book = new Book();
 
         try {
