@@ -5,7 +5,6 @@ import project.entity.Book;
 import project.entity.Reader;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -86,9 +85,7 @@ public class LibraryService {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
 
-        List<Book> bookList = libraryDAO.findAllBorrowedBooksByReaderId(input);
-
-        bookList.forEach(System.out::println);
+        libraryDAO.findAllBorrowedBooksByReaderId(input).forEach(System.out::println);
     }
 
     public void showReadersCurrentBook() {
@@ -97,9 +94,7 @@ public class LibraryService {
         Scanner scanner = new Scanner(System.in);
         int input = scanner.nextInt();
 
-        List<Reader> readerList = libraryDAO.findAllReadersByBookId(input);
-
-        readerList.forEach(System.out::println);
+        libraryDAO.findAllReadersByBookId(input).forEach(System.out::println);
     }
 
     public void showAllReadersAndBorrowedBook() {

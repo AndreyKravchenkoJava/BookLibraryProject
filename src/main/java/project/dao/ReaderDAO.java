@@ -3,7 +3,6 @@ package project.dao;
 import project.connector.ConnectionCreator;
 import project.entity.Reader;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +15,7 @@ public class ReaderDAO {
         boolean flag = false;
         final String SQL_SAVE_READER = "INSERT INTO reader(name) VALUES(?)";
 
-        try (Connection connection = ConnectionCreator.createConnection();
+        try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_READER)) {
 
             preparedStatement.setString(1, reader.getName());
@@ -34,7 +33,7 @@ public class ReaderDAO {
         List<Reader> readerList = new ArrayList<>();
         final String SQL_FIND_ALL_READERS = "SELECT * FROM reader";
 
-        try (Connection connection = ConnectionCreator.createConnection();
+        try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_FIND_ALL_READERS)) {
 
             ResultSet resultSet = preparedStatement.executeQuery();

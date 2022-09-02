@@ -4,7 +4,6 @@ import project.connector.ConnectionCreator;
 import project.entity.Book;
 import project.entity.Reader;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +15,7 @@ public class LibraryDAO {
         boolean flag = false;
         final String SQL_SAVE_BORROWING = "INSERT INTO book_reader(book_id, reader_id) VALUES(?,?)";
 
-        try (Connection connection = ConnectionCreator.createConnection();
+        try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_BORROWING)) {
 
             preparedStatement.setInt(1, bookID);
@@ -35,7 +34,7 @@ public class LibraryDAO {
         boolean flag = false;
         final String SQL_DELETE_BORROWING = "DELETE FROM book_reader WHERE book_id = (?) AND reader_id = (?)";
 
-        try (Connection connection = ConnectionCreator.createConnection();
+        try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE_BORROWING)) {
 
             preparedStatement.setInt(1, bookId);
@@ -56,7 +55,7 @@ public class LibraryDAO {
                 "JOIN book_reader ON book_reader.book_id = book.id \n" +
                 "WHERE book_reader.reader_id = (?)";
 
-        try (Connection connection = ConnectionCreator.createConnection();
+        try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_GET_READER_BORROWED_BOOK)) {
 
             preparedStatement.setInt(1, readerId);
@@ -64,7 +63,7 @@ public class LibraryDAO {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                bookList.add(mapToBorrowedBook(resultSet));
+                bookList.add(mapToBook(resultSet));
             }
 
         } catch (SQLException throwables) {
@@ -80,7 +79,7 @@ public class LibraryDAO {
                 "WHERE book_reader.book_id = (?)\n" +
                 "ORDER BY reader.id";
 
-        try (Connection connection = ConnectionCreator.createConnection();
+        try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_GET_READERS_BY_CURRENT_BOOK)) {
 
             preparedStatement.setInt(1, bookId);
@@ -103,7 +102,7 @@ public class LibraryDAO {
                 "FROM reader, book JOIN book_reader \n" +
                 "ON book_reader.book_id = book.id WHERE reader.id = book_reader.reader_id";
 
-        try (Connection connection = ConnectionCreator.createConnection();
+        try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_GET_ALL_READERS_AND_BORROWED_BOOK)) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -111,7 +110,7 @@ public class LibraryDAO {
 
             while (resultSet.next()) {
                 Reader reader = mapToReader(resultSet);
-                Book book = mapToBorrowedBook(resultSet);
+                Book book = mapToBook(resultSet);
 
                 if (readerListMap.keySet().contains(reader)) {
                     readerListMap.get(reader).add(book);
@@ -144,7 +143,7 @@ public class LibraryDAO {
         return reader;
     }
 
-    private Book mapToBorrowedBook(ResultSet resultSet) {
+    private Book mapToBook(ResultSet resultSet) {
         Book book = new Book();
 
         try {
