@@ -7,6 +7,7 @@ import project.entity.Book;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LibraryDAOTest {
@@ -19,6 +20,9 @@ class LibraryDAOTest {
 
     @Test
     void borrowBookIdToReaderId() {
+        boolean flag = libraryDAO.borrowBookIdToReaderId(5, 10);
+
+        assertThat(flag).isTrue();
     }
 
     @Test

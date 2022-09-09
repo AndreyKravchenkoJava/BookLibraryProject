@@ -24,10 +24,10 @@ public class ConsoleUI {
         switch (choice) {
             case "1" -> libraryService.showBooks();
             case "2" -> libraryService.showReaders();
-            case "3" -> libraryService.addReaders();
-            case "4" -> libraryService.addBook();
-            case "5" -> libraryService.borrowBook();
-            case "6" -> libraryService.returnBookToLibrary();
+            case "3" -> addReaderToLibrary();
+            case "4" -> addBookToLibrary();
+            case "5" -> borrowBook();
+            case "6" -> returnBookToLibrary();
             case "7" -> libraryService.showAllBorrowedBooksUser();
             case "8" -> libraryService.showReadersCurrentBook();
             case "9" -> libraryService.showAllReadersAndBorrowedBook();
@@ -53,5 +53,29 @@ public class ConsoleUI {
                 
                 Type 'exit' to stop program and exit!
                 """);
+    }
+
+    private void addReaderToLibrary() {
+        System.out.println("Please enter new reader full name!");
+        String input = scanner.nextLine();
+        libraryService.addReaders(input);
+    }
+
+    private void addBookToLibrary() {
+        System.out.println("Please enter new book name and author separated by “/”. Like this: name / author");
+        String input = scanner.nextLine();
+        libraryService.addBook(input);
+    }
+
+    private void borrowBook() {
+        System.out.println("Please enter bookId and readerId separated by “/” for borrow. Like this: bookId / readerId");
+        String input = scanner.nextLine();
+        libraryService.borrowBook(input);
+    }
+
+    private void returnBookToLibrary() {
+        System.out.println("Please enter bookId and readerId to return the book to the library. Like this: bookId / readerId");
+        String input = scanner.nextLine();
+        libraryService.returnBookToLibrary(input);
     }
 }

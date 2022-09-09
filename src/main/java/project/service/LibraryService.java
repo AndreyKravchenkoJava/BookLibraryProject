@@ -21,64 +21,57 @@ public class LibraryService {
     public void showReaders() {
         readerDAO.findAll().forEach(System.out::println);
     }
-
-    public void addBook() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Please enter new book name and author separated by “/”. Like this: name / author");
-
-        String input = scanner.nextLine();
-        String[] nameAndAuthorArray = input.split(" / ");
+///////////////////////////////////////////////////////////
+    public Book addBook(String input) {
+        String[] titleAndAuthorArray = input.split(" / ");
 
         Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
-        Matcher matcher = pattern.matcher(nameAndAuthorArray[1]);
+        Matcher matcher = pattern.matcher(titleAndAuthorArray[1]);
 
         if (matcher.find()) {
-            bookDAO.save(new Book(nameAndAuthorArray[0], nameAndAuthorArray[1]));
+            Book book = new Book(titleAndAuthorArray[0], titleAndAuthorArray[1]);
+            bookDAO.save(book);
+            return book;
         } else {
             System.out.println("Name must contain only letters and have more than two letters");
+            return null;
         }
     }
 
-    public void addReaders() {
-        System.out.println("Please enter new reader full name!");
-        Scanner scanner = new Scanner(System.in);
-
-        String input = scanner.nextLine();
-
+    public Reader addReaders(String input) {
         Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
         Matcher matcher = pattern.matcher(input);
 
         if (matcher.find()) {
-            readerDAO.save(new Reader(input));
+            Reader reader = new Reader(input);
+            readerDAO.save(reader);
+            return reader;
         } else {
             System.out.println("Name must contain only letters and have more than two letters");
+            return null;
         }
     }
 
-    public void borrowBook() {
-        System.out.println("Please enter bookId and readerId separated by “/” for borrow. Like this: bookId / readerId");
-
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
+    public boolean borrowBook(String input) {
         int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
         int bookId = arrayIndicators[0];
         int readerId = arrayIndicators[1];
 
-        libraryDAO.borrowBookIdToReaderId(bookId, readerId);
+        boolean flag = libraryDAO.borrowBookIdToReaderId(bookId, readerId);
+
+        return flag;
     }
 
-    public void returnBookToLibrary() {
-        System.out.println("Please enter bookId and readerId to return the book to the library. Like this: bookId / readerId");
-
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
+    public boolean returnBookToLibrary(String input) {
         int[] bookIDAndReaderId = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
         int bookId = bookIDAndReaderId[0];
         int readerId= bookIDAndReaderId[1];
 
-        libraryDAO.returnBookIdFromReaderId(bookId, readerId);
-    }
+        boolean flag = libraryDAO.returnBookIdFromReaderId(bookId, readerId);
 
+        return flag;
+    }
+///////////////////////////////////////////////////////////
     public void showAllBorrowedBooksUser() {
         System.out.println("Please enter readerID");
 
@@ -99,5 +92,17 @@ public class LibraryService {
 
     public void showAllReadersAndBorrowedBook() {
         libraryDAO.findAllReadersAndBorrowedBooks().forEach((k, v) -> System.out.println(k + " : " + v));
+    }
+
+    public void setLibraryDAO(LibraryDAO libraryDAO) {
+        this.libraryDAO = libraryDAO;
+    }
+
+    public void setBookDAO(BookDAO bookDAO) {
+        this.bookDAO = bookDAO;
+    }
+
+    public void setReaderDAO(ReaderDAO readerDAO) {
+        this.readerDAO = readerDAO;
     }
 }
