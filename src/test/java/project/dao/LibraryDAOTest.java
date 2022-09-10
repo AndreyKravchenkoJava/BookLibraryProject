@@ -20,7 +20,7 @@ class LibraryDAOTest {
 
     @Test
     void borrowBookIdToReaderId() {
-        boolean flag = libraryDAO.borrowBookIdToReaderId(5, 10);
+        boolean flag = libraryDAO.borrowBookIdToReaderId(5, 12);
 
         assertThat(flag).isTrue();
     }
