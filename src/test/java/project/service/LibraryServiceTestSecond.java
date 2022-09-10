@@ -90,9 +90,9 @@ class LibraryServiceTestSecond {
     @DisplayName("Testing borrow book to reader by id")
     @Test
     void borrowBook() {
-        int expectedBookId = 7;
+        int expectedBookId = 1;
         int expectedReaderId = 12;
-        String userInput = "3 / 12";
+        String userInput = "1 / 12";
         boolean flagService = libraryService.borrowBook(userInput);
 
         ArgumentCaptor<Integer> bookIdCaptor = ArgumentCaptor.forClass(Integer.class);
