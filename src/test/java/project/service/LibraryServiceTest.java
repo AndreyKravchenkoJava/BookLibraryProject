@@ -11,9 +11,10 @@ import project.entity.Book;
 import project.entity.Reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.*;
 
-class LibraryServiceTestSecond {
+class LibraryServiceTest {
     private LibraryService libraryService;
     private LibraryDAO libraryDAO;
     private BookDAO bookDAO;
@@ -42,10 +43,12 @@ class LibraryServiceTestSecond {
         verify(bookDAO, times(1)).save(captor.capture());
         Book bookToSave = captor.getValue();
 
-        assertThat(createdBook).isNotNull();
-        assertThat(expectedTitle).isEqualTo(createdBook.getTitle());
-        assertThat(expectedAuthor).isEqualTo(createdBook.getAuthor());
-        assertThat(createdBook).isEqualTo(bookToSave);
+        assertAll(
+                () -> assertThat(createdBook).isNotNull(),
+                () -> assertThat(expectedTitle).isEqualTo(createdBook.getTitle()),
+                () -> assertThat(expectedAuthor).isEqualTo(createdBook.getAuthor()),
+                () -> assertThat(createdBook).isEqualTo(bookToSave)
+        );
     }
 
     @DisplayName("Testing adding wrong new book")
@@ -71,9 +74,12 @@ class LibraryServiceTestSecond {
         verify(readerDAO, times(1)).save(captor.capture());
         Reader readerToSave = captor.getValue();
 
-        assertThat(createdReader).isNotNull();
-        assertThat(userInput).isEqualTo(createdReader.getName());
-        assertThat(createdReader).isEqualTo(readerToSave);
+        assertAll(
+                () -> assertThat(createdReader).isNotNull(),
+                () -> assertThat(userInput).isEqualTo(createdReader.getName()),
+                () -> assertThat(createdReader).isEqualTo(readerToSave)
+        );
+
     }
 
     @DisplayName("Testing adding wrong new reader")
@@ -92,23 +98,47 @@ class LibraryServiceTestSecond {
     void borrowBook() {
         int expectedBookId = 1;
         int expectedReaderId = 12;
-        String userInput = "1 / 12";
-        boolean flagService = libraryService.borrowBook(userInput);
+        String userInput = expectedBookId + " / " + expectedReaderId;
 
         ArgumentCaptor<Integer> bookIdCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> readerIdCaptor = ArgumentCaptor.forClass(Integer.class);
-        verify(libraryDAO, times(1)).borrowBookIdToReaderId(bookIdCaptor.capture(), readerIdCaptor.capture());
+        when(libraryDAO.borrowBookIdToReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(true);
+
+        boolean flag = libraryService.borrowBook(userInput);
+
         int bookIdToSave = bookIdCaptor.getValue();
         int readerIdToSave = readerIdCaptor.getValue();
 
+        assertAll(
+                () -> verify(libraryDAO, times(1)).borrowBookIdToReaderId(bookIdToSave, readerIdToSave),
+                () -> assertThat(flag).isTrue(),
+                () -> assertThat(bookIdToSave).isEqualTo(expectedBookId),
+                () -> assertThat(readerIdToSave).isEqualTo(expectedReaderId)
 
-        assertThat(flagService).isTrue();
-        assertThat(bookIdToSave).isEqualTo(expectedBookId);
-        assertThat(readerIdToSave).isEqualTo(expectedReaderId);
+        );
     }
 
-
+    @DisplayName("Testing return book to reader by id")
     @Test
     void returnBookToLibrary() {
+        int expectedBookId = 1;
+        int expectedReaderId = 13;
+        String userInput = expectedBookId + " / " + expectedReaderId;
+
+        ArgumentCaptor<Integer> bookIdCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> readerIdCaptor = ArgumentCaptor.forClass(Integer.class);
+        when(libraryDAO.returnBookIdFromReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(true);
+
+        boolean flag = libraryService.returnBookToLibrary(userInput);
+
+        int bookIdToSave = bookIdCaptor.getValue();
+        int readerIdToSave = readerIdCaptor.getValue();
+
+        assertAll(
+                () -> verify(libraryDAO, times(1)).returnBookIdFromReaderId(bookIdToSave, readerIdToSave),
+                () -> assertThat(flag).isTrue(),
+                () -> assertThat(bookIdToSave).isEqualTo(expectedBookId),
+                () -> assertThat(readerIdToSave).isEqualTo(expectedReaderId)
+        );
     }
 }

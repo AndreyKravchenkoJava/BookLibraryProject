@@ -21,7 +21,7 @@ public class LibraryService {
     public void showReaders() {
         readerDAO.findAll().forEach(System.out::println);
     }
-///////////////////////////////////////////////////////////
+
     public Book addBook(String input) {
         String[] titleAndAuthorArray = input.split(" / ");
 
@@ -71,7 +71,7 @@ public class LibraryService {
 
         return flag;
     }
-///////////////////////////////////////////////////////////
+
     public void showAllBorrowedBooksUser() {
         System.out.println("Please enter readerID");
 
