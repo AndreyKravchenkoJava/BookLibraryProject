@@ -11,14 +11,14 @@ import java.util.*;
 
 public class LibraryDAO {
 
-    public boolean borrowBookIdToReaderId(int bookID, int readerId) {
+    public boolean borrowBookIdToReaderId(int bookId, int readerId) throws SQLException {
         boolean flag = false;
         final String SQL_SAVE_BORROWING = "INSERT INTO book_reader(book_id, reader_id) VALUES(?,?)";
 
         try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_BORROWING)) {
 
-            preparedStatement.setInt(1, bookID);
+            preparedStatement.setInt(1, bookId);
             preparedStatement.setInt(2, readerId);
             preparedStatement.execute();
 
@@ -30,8 +30,9 @@ public class LibraryDAO {
         return flag;
     }
 
-    public boolean returnBookIdFromReaderId(int bookId, int readerId) {
+    public boolean returnBookIdFromReaderId(int bookId, int readerId) throws NoSuchElementException {
         boolean flag = false;
+        int amount = 0;
         final String SQL_DELETE_BORROWING = "DELETE FROM book_reader WHERE book_id = (?) AND reader_id = (?)";
 
         try (var connection = ConnectionCreator.createConnection();
@@ -39,9 +40,11 @@ public class LibraryDAO {
 
             preparedStatement.setInt(1, bookId);
             preparedStatement.setInt(2, readerId);
-            preparedStatement.executeUpdate();
+            amount = preparedStatement.executeUpdate();
 
-            flag = true;
+            if (amount == 1) {
+                flag = true;
+            }
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -49,7 +52,7 @@ public class LibraryDAO {
         return flag;
     }
 
-    public List<Book> findAllBorrowedBooksByReaderId(int readerId) {
+    public List<Book> findAllBorrowedBooksByReaderId(int readerId) throws NoSuchElementException {
         List<Book> bookList = new ArrayList<>();
         final String SQL_GET_READER_BORROWED_BOOK = "SELECT book.id AS book_id, book.title, book.author FROM book \n" +
                 "JOIN book_reader ON book_reader.book_id = book.id \n" +
@@ -72,7 +75,7 @@ public class LibraryDAO {
         return bookList;
     }
 
-    public List<Reader> findAllReadersByBookId(int bookId) {
+    public List<Reader> findAllReadersByBookId(int bookId) throws NoSuchElementException {
         List<Reader> readerList = new ArrayList<>();
         final String SQL_GET_READERS_BY_CURRENT_BOOK = "SELECT reader.id, reader.name FROM reader JOIN book_reader\n" +
                 "ON book_reader.reader_id = reader.id \n" +
@@ -106,7 +109,6 @@ public class LibraryDAO {
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_GET_ALL_READERS_AND_BORROWED_BOOK)) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
-
 
             while (resultSet.next()) {
                 Reader reader = mapToReader(resultSet);

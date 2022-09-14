@@ -11,7 +11,7 @@ import java.util.List;
 
 public class ReaderDAO {
 
-    public boolean save(Reader reader) {
+    public boolean save(Reader reader) throws IllegalArgumentException {
         boolean flag = false;
         final String SQL_SAVE_READER = "INSERT INTO reader(name) VALUES(?)";
 

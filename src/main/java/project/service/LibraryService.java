@@ -4,7 +4,9 @@ import project.dao.*;
 import project.entity.Book;
 import project.entity.Reader;
 
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,71 +25,117 @@ public class LibraryService {
     }
 
     public Book addBook(String input) {
-        String[] titleAndAuthorArray = input.split(" / ");
+        Book book = null;
 
-        Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
-        Matcher matcher = pattern.matcher(titleAndAuthorArray[1]);
+        try {
+            String[] titleAndAuthorArray = input.split(" / ");
 
-        if (matcher.find()) {
-            Book book = new Book(titleAndAuthorArray[0], titleAndAuthorArray[1]);
-            bookDAO.save(book);
-            return book;
-        } else {
-            System.out.println("Name must contain only letters and have more than two letters");
-            return null;
+            Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
+            Matcher matcher = pattern.matcher(titleAndAuthorArray[1]);
+
+            if (matcher.find()) {
+                book = new Book(titleAndAuthorArray[0], titleAndAuthorArray[1]);
+                bookDAO.save(book);
+            } else {
+                throw new IllegalArgumentException("Name author must contain only letters and have more than two letters");
+            }
+
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
+        return book;
     }
 
     public Reader addReaders(String input) {
-        Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
-        Matcher matcher = pattern.matcher(input);
+        Reader reader = null;
 
-        if (matcher.find()) {
-            Reader reader = new Reader(input);
-            readerDAO.save(reader);
-            return reader;
-        } else {
-            System.out.println("Name must contain only letters and have more than two letters");
-            return null;
+        try {
+            Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
+            Matcher matcher = pattern.matcher(input);
+
+            if (matcher.find()) {
+                reader = new Reader(input);
+                readerDAO.save(reader);
+            } else {
+                throw new IllegalArgumentException("Name must contain only letters and have more than two letters");
+            }
+
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
         }
+        return reader;
     }
 
     public boolean borrowBook(String input) {
-        int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
-        int bookId = arrayIndicators[0];
-        int readerId = arrayIndicators[1];
+        boolean flag = false;
 
-        boolean flag = libraryDAO.borrowBookIdToReaderId(bookId, readerId);
+        try {
+            int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
+            int bookId = arrayIndicators[0];
+            int readerId = arrayIndicators[1];
 
+            flag = libraryDAO.borrowBookIdToReaderId(bookId, readerId);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return flag;
     }
 
     public boolean returnBookToLibrary(String input) {
-        int[] bookIDAndReaderId = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
-        int bookId = bookIDAndReaderId[0];
-        int readerId= bookIDAndReaderId[1];
+        boolean flag = false;
 
-        boolean flag = libraryDAO.returnBookIdFromReaderId(bookId, readerId);
+        try {
+            int[] bookIDAndReaderId = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
+            int bookId = bookIDAndReaderId[0];
+            int readerId= bookIDAndReaderId[1];
 
+            flag = libraryDAO.returnBookIdFromReaderId(bookId, readerId);
+
+            if (flag == false) {
+                throw new NoSuchElementException("Book Id: " + bookId + " or reader Id: " + readerId + " is not in the Library or reader did not borrow this book");
+            }
+
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+        }
         return flag;
     }
 
     public void showAllBorrowedBooksUser() {
         System.out.println("Please enter readerID");
 
-        Scanner scanner = new Scanner(System.in);
-        int input = scanner.nextInt();
+        try {
+            Scanner scanner = new Scanner(System.in);
+            int input = scanner.nextInt();
 
-        libraryDAO.findAllBorrowedBooksByReaderId(input).forEach(System.out::println);
+            if (libraryDAO.findAllBorrowedBooksByReaderId(input).size() != 0) {
+                libraryDAO.findAllBorrowedBooksByReaderId(input).forEach(System.out::println);
+            } else {
+                throw new NoSuchElementException("Reader Id: " + input + " did not take the book or the reader is not in the Library");
+            }
+
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+        }
     }
 
     public void showReadersCurrentBook() {
         System.out.println("Please enter bookId");
 
-        Scanner scanner = new Scanner(System.in);
-        int input = scanner.nextInt();
+        try {
+            Scanner scanner = new Scanner(System.in);
+            int input = scanner.nextInt();
 
-        libraryDAO.findAllReadersByBookId(input).forEach(System.out::println);
+            if (libraryDAO.findAllReadersByBookId(input).size() != 0) {
+                libraryDAO.findAllReadersByBookId(input).forEach(System.out::println);
+            } else {
+                throw new NoSuchElementException("Book:" + input + " was not borrowed by readers or the book is not in the Library");
+            }
+
+        } catch (NoSuchElementException e) {
+            e.printStackTrace();
+        }
     }
 
     public void showAllReadersAndBorrowedBook() {

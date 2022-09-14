@@ -11,7 +11,7 @@ import java.util.List;
 
 public class BookDAO {
 
-    public boolean save(Book book) {
+    public boolean save(Book book) throws IllegalArgumentException {
         boolean flag = false;
         final String SQL_SAVE_BOOK = "INSERT INTO book(title, author) VALUES(?,?)";
 
