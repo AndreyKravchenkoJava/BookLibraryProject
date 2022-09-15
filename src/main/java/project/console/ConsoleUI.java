@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class ConsoleUI {
     private LibraryService libraryService = new LibraryService();
 
-    Scanner scanner = new Scanner(System.in);
+    private Scanner scanner = new Scanner(System.in);
 
     public void run() {
         System.out.println("Welcome to the library!");
@@ -28,8 +28,8 @@ public class ConsoleUI {
             case "4" -> addBookToLibrary();
             case "5" -> borrowBook();
             case "6" -> returnBookToLibrary();
-            case "7" -> libraryService.showAllBorrowedBooksUser();
-            case "8" -> libraryService.showReadersCurrentBook();
+            case "7" -> showAllBorrowedBooksByReaderId();
+            case "8" -> showAllReadersByCurrentBook();
             case "9" -> libraryService.showAllReadersAndBorrowedBook();
             case "exit" -> {
                 System.out.println("Goodbye!");
@@ -77,5 +77,17 @@ public class ConsoleUI {
         System.out.println("Please enter bookId and readerId to return the book to the library. Like this: bookId / readerId");
         String input = scanner.nextLine();
         libraryService.returnBookToLibrary(input);
+    }
+
+    private void showAllBorrowedBooksByReaderId() {
+        System.out.println("Please enter readerID");
+        String input = scanner.nextLine();
+        libraryService.showAllBorrowedBooksReader(input);
+    }
+
+    private void showAllReadersByCurrentBook() {
+        System.out.println("Please enter bookId");
+        String input = scanner.nextLine();
+        libraryService.showReadersCurrentBook(input);
     }
 }

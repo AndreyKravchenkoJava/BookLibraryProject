@@ -102,17 +102,15 @@ public class LibraryService {
         return flag;
     }
 
-    public void showAllBorrowedBooksUser() {
-        System.out.println("Please enter readerID");
+    public void showAllBorrowedBooksReader(String input) {
 
         try {
-            Scanner scanner = new Scanner(System.in);
-            int input = scanner.nextInt();
+            int readerId = Integer.parseInt(input);
 
-            if (libraryDAO.findAllBorrowedBooksByReaderId(input).size() != 0) {
-                libraryDAO.findAllBorrowedBooksByReaderId(input).forEach(System.out::println);
+            if (libraryDAO.findAllBorrowedBooksByReaderId(readerId).size() != 0) {
+                libraryDAO.findAllBorrowedBooksByReaderId(readerId).forEach(System.out::println);
             } else {
-                throw new NoSuchElementException("Reader Id: " + input + " did not take the book or the reader is not in the Library");
+                throw new NoSuchElementException("Reader Id: " + readerId + " did not take the book or the reader is not in the Library");
             }
 
         } catch (NoSuchElementException e) {
@@ -120,17 +118,15 @@ public class LibraryService {
         }
     }
 
-    public void showReadersCurrentBook() {
-        System.out.println("Please enter bookId");
+    public void showReadersCurrentBook(String input) {
 
         try {
-            Scanner scanner = new Scanner(System.in);
-            int input = scanner.nextInt();
+            int bookId = Integer.parseInt(input);
 
-            if (libraryDAO.findAllReadersByBookId(input).size() != 0) {
-                libraryDAO.findAllReadersByBookId(input).forEach(System.out::println);
+            if (libraryDAO.findAllReadersByBookId(bookId).size() != 0) {
+                libraryDAO.findAllReadersByBookId(bookId).forEach(System.out::println);
             } else {
-                throw new NoSuchElementException("Book:" + input + " was not borrowed by readers or the book is not in the Library");
+                throw new NoSuchElementException("Book:" + bookId + " was not borrowed by readers or the book is not in the Library");
             }
 
         } catch (NoSuchElementException e) {
