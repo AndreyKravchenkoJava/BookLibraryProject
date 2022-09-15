@@ -6,6 +6,7 @@ import project.entity.Reader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,12 +17,18 @@ public class ReaderDAO {
         final String SQL_SAVE_READER = "INSERT INTO reader(name) VALUES(?)";
 
         try (var connection = ConnectionCreator.createConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_READER)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_READER, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, reader.getName());
             preparedStatement.execute();
 
             flag = true;
+
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+            if (resultSet.next()) {
+                reader.setId(resultSet.getInt("id"));
+            }
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();

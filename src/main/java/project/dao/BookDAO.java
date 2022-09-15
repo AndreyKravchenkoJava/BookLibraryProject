@@ -6,6 +6,7 @@ import project.entity.Book;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,13 +17,19 @@ public class BookDAO {
         final String SQL_SAVE_BOOK = "INSERT INTO book(title, author) VALUES(?,?)";
 
         try (var connection = ConnectionCreator.createConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_BOOK)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_BOOK, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setString(1, book.getTitle());
             preparedStatement.setString(2, book.getAuthor());
             preparedStatement.execute();
 
             flag = true;
+
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+
+            if (resultSet.next()) {
+                book.setId(resultSet.getInt("id"));
+            }
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();

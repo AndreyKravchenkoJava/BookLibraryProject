@@ -7,7 +7,6 @@ import project.entity.Reader;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

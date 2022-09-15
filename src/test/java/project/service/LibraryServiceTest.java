@@ -34,9 +34,9 @@ class LibraryServiceTest {
         libraryService.setReaderDAO(readerDAO);
     }
 
-    @DisplayName("Testing adding correct new book")
+    @DisplayName("Test should successfully add new book")
     @Test
-    void addCorrectBookTest() {
+    void shouldSuccessfullyAddNewBook() {
         String expectedTitle = "My life, my achievements";
         String expectedAuthor = "Henry Ford";
         String userInput = expectedTitle + " / " + expectedAuthor;
@@ -54,9 +54,9 @@ class LibraryServiceTest {
         );
     }
 
-    @DisplayName("Testing adding wrong new book")
+    @DisplayName("Test should fail to add new reader")
     @Test
-    void addWrongBookTest() {
+    void shouldFailAddNewBook() {
         String expectedTitle = "My life, my achievements";
         String expectedAuthor = "Henry Ford 1";
         String userInput = expectedTitle + " / " + expectedAuthor;
@@ -69,15 +69,17 @@ class LibraryServiceTest {
         //при проверке на exception выдает ошибку
     }
 
-    @DisplayName("Testing adding correct new reader")
+    @DisplayName("Test should successfully add new reader ")
     @Test
-    void addCorrectReadersTest() {
+    void shouldSuccessfullyAddNewReader() {
         String userInput = "Alexander Singeev";
         Reader createdReader = libraryService.addReaders(userInput);
+        System.out.println(createdReader);
 
         ArgumentCaptor<Reader> captor = ArgumentCaptor.forClass(Reader.class);
         verify(readerDAO, times(1)).save(captor.capture());
         Reader readerToSave = captor.getValue();
+        System.out.println(readerToSave);
 
         assertAll(
                 () -> assertThat(createdReader).isNotNull(),
@@ -86,9 +88,9 @@ class LibraryServiceTest {
         );
     }
 
-    @DisplayName("Testing adding wrong new reader")
+    @DisplayName("Test should fail to add new reader")
     @Test
-    void addWrongReadersTest() {
+    void shouldFailAddNewReader() {
         String userInput = "Alexander Singeev 1";
         Reader createdReader = libraryService.addReaders(userInput);
 
@@ -99,9 +101,9 @@ class LibraryServiceTest {
         //при проверке на exception выдает ошибку
     }
 
-    @DisplayName("Testing borrow book to reader by id")
+    @DisplayName("Test should successfully borrow book to reader")
     @Test
-    void correctBorrowBookTest() throws SQLException {
+    void shouldSuccessfullyBorrowBookToReader() throws SQLException {
         int expectedBookId = 1;
         int expectedReaderId = 12;
         String userInput = expectedBookId + " / " + expectedReaderId;
@@ -124,9 +126,9 @@ class LibraryServiceTest {
         );
     }
 
-    @DisplayName("Testing borrow book to reader by id")
+    @DisplayName("Test should fail to borrow book to non existing reader")
     @Test
-    void wrongBorrowBookTest() throws SQLException {
+    void shouldFailBorrowBookToReader() throws SQLException {
         int expectedBookId = 20;
         int expectedReaderId = 20;
         String userInput = expectedBookId + " / " + expectedReaderId;
@@ -149,9 +151,9 @@ class LibraryServiceTest {
         );
     }
 
-    @DisplayName("Testing return book to reader by id")
+    @DisplayName("Test should successfully return book to the Library")
     @Test
-    void returnCorrectBookToLibraryTest() {
+    void shouldSuccessfullyReturnBookToLibrary() {
         int expectedBookId = 1;
         int expectedReaderId = 13;
         String userInput = expectedBookId + " / " + expectedReaderId;
@@ -173,9 +175,9 @@ class LibraryServiceTest {
         );
     }
 
-    @DisplayName("Testing return book to reader by id")
+    @DisplayName("Test should fail return book to the Library")
     @Test
-    void returnWrongBookToLibraryTest() {
+    void shouldFailReturnBookToLibrary() {
         int expectedBookId = 20;
         int expectedReaderId = 20;
         String userInput = expectedBookId + " / " + expectedReaderId;
