@@ -11,7 +11,7 @@ import java.util.*;
 
 public class LibraryDAO {
 
-    public boolean borrowBookIdToReaderId(int bookId, int readerId) throws SQLException {
+    public boolean borrowBookIdToReaderId(int bookId, int readerId) {
         boolean flag = false;
         final String SQL_SAVE_BORROWING = "INSERT INTO book_reader(book_id, reader_id) VALUES(?,?)";
 
@@ -25,12 +25,13 @@ public class LibraryDAO {
             flag = true;
 
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return flag;
     }
 
-    public boolean returnBookIdFromReaderId(int bookId, int readerId) throws NoSuchElementException {
+    public boolean returnBookIdFromReaderId(int bookId, int readerId) {
         boolean flag = false;
         int amount = 0;
         final String SQL_DELETE_BORROWING = "DELETE FROM book_reader WHERE book_id = (?) AND reader_id = (?)";
@@ -47,12 +48,13 @@ public class LibraryDAO {
             }
 
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return flag;
     }
 
-    public List<Book> findAllBorrowedBooksByReaderId(int readerId) throws NoSuchElementException {
+    public List<Book> findAllBorrowedBooksByReaderId(int readerId) {
         List<Book> bookList = new ArrayList<>();
         final String SQL_GET_READER_BORROWED_BOOK = "SELECT book.id AS book_id, book.title, book.author FROM book \n" +
                 "JOIN book_reader ON book_reader.book_id = book.id \n" +
@@ -70,12 +72,13 @@ public class LibraryDAO {
             }
 
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return bookList;
     }
 
-    public List<Reader> findAllReadersByBookId(int bookId) throws NoSuchElementException {
+    public List<Reader> findAllReadersByBookId(int bookId) {
         List<Reader> readerList = new ArrayList<>();
         final String SQL_GET_READERS_BY_CURRENT_BOOK = "SELECT reader.id, reader.name FROM reader JOIN book_reader\n" +
                 "ON book_reader.reader_id = reader.id \n" +
@@ -94,6 +97,7 @@ public class LibraryDAO {
             }
 
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return readerList;
@@ -124,6 +128,7 @@ public class LibraryDAO {
             }
 
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return readerListMap;

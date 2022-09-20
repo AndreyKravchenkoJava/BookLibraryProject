@@ -12,7 +12,7 @@ import java.util.List;
 
 public class BookDAO {
 
-    public boolean save(Book book) throws IllegalArgumentException {
+    public boolean save(Book book) {
         boolean flag = false;
         final String SQL_SAVE_BOOK = "INSERT INTO book(title, author) VALUES(?,?)";
 
@@ -23,7 +23,6 @@ public class BookDAO {
             preparedStatement.setString(2, book.getAuthor());
             preparedStatement.execute();
 
-            flag = true;
 
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
 
@@ -31,7 +30,10 @@ public class BookDAO {
                 book.setId(resultSet.getInt("id"));
             }
 
+            flag = true;
+
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return flag;
@@ -51,6 +53,7 @@ public class BookDAO {
             }
 
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return bookList;

@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class LibraryService {
     private LibraryDAO libraryDAO = new LibraryDAO();
@@ -29,14 +30,25 @@ public class LibraryService {
         try {
             String[] titleAndAuthorArray = input.split(" / ");
 
+            String title = titleAndAuthorArray[0];
+            String author = titleAndAuthorArray[1];
+
             Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
-            Matcher matcher = pattern.matcher(titleAndAuthorArray[1]);
+            Matcher matcher = pattern.matcher(author);
 
             if (matcher.find()) {
-                book = new Book(titleAndAuthorArray[0], titleAndAuthorArray[1]);
+                book = new Book(title, author);
                 bookDAO.save(book);
             } else {
-                throw new IllegalArgumentException("Name author must contain only letters and have more than two letters");
+                throw new IllegalArgumentException("""
+                        
+                        Fail when adding name!
+                        
+                        1. Name must contain only letters
+                        2. Have more than two letters
+                        3. Maximum number of letters 100
+                        
+                        Fro example 'Danyl Zanuk'""");
             }
 
         } catch (IllegalArgumentException e) {
@@ -56,7 +68,15 @@ public class LibraryService {
                 reader = new Reader(input);
                 readerDAO.save(reader);
             } else {
-                throw new IllegalArgumentException("Name must contain only letters and have more than two letters");
+                throw new IllegalArgumentException("""
+                        
+                        Fail when adding name!
+                        
+                        1. Name must contain only letters
+                        2. Have more than two letters
+                        3. Maximum number of letters 100
+                        
+                        Fro example 'Danyl Zanuk'""");
             }
 
         } catch (IllegalArgumentException e) {
@@ -72,12 +92,12 @@ public class LibraryService {
             int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
             int bookId = arrayIndicators[0];
             int readerId = arrayIndicators[1];
-
             flag = libraryDAO.borrowBookIdToReaderId(bookId, readerId);
 
-        } catch (SQLException e) {
+        } catch (NumberFormatException e) {
             e.printStackTrace();
         }
+
         return flag;
     }
 
@@ -85,17 +105,24 @@ public class LibraryService {
         boolean flag = false;
 
         try {
-            int[] bookIDAndReaderId = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
-            int bookId = bookIDAndReaderId[0];
-            int readerId= bookIDAndReaderId[1];
+            int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
+            int bookId = arrayIndicators[0];
+            int readerId = arrayIndicators[1];
 
             flag = libraryDAO.returnBookIdFromReaderId(bookId, readerId);
 
-            if (flag == false) {
-                throw new NoSuchElementException("Book Id: " + bookId + " or reader Id: " + readerId + " is not in the Library or reader did not borrow this book");
+            if (!flag) {
+                throw new NoSuchElementException("""
+                        
+                        Fail when returning book in Library!
+                        
+                        Possible reasons:
+                        1. There is no such book
+                        2. There is no such reader
+                        3. Reader with this Id has not borrowed a book with this Id""");
             }
 
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | NumberFormatException e) {
             e.printStackTrace();
         }
         return flag;
@@ -106,13 +133,19 @@ public class LibraryService {
         try {
             int readerId = Integer.parseInt(input);
 
-            if (libraryDAO.findAllBorrowedBooksByReaderId(readerId).size() != 0) {
+            if (!libraryDAO.findAllBorrowedBooksByReaderId(readerId).isEmpty()) {
                 libraryDAO.findAllBorrowedBooksByReaderId(readerId).forEach(System.out::println);
             } else {
-                throw new NoSuchElementException("Reader Id: " + readerId + " did not take the book or the reader is not in the Library");
+                throw new NoSuchElementException("""
+                        
+                        Fail when show borrowed books by readers:
+                        
+                        Possible reasons:
+                        1. There is no such reader
+                        2. The reader did not borrow the books""");
             }
 
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | NumberFormatException e) {
             e.printStackTrace();
         }
     }
@@ -122,13 +155,19 @@ public class LibraryService {
         try {
             int bookId = Integer.parseInt(input);
 
-            if (libraryDAO.findAllReadersByBookId(bookId).size() != 0) {
+            if (!libraryDAO.findAllReadersByBookId(bookId).isEmpty()) {
                 libraryDAO.findAllReadersByBookId(bookId).forEach(System.out::println);
             } else {
-                throw new NoSuchElementException("Book:" + bookId + " was not borrowed by readers or the book is not in the Library");
+                throw new NoSuchElementException("""
+                        
+                        Fail when show reader by current book:
+                        
+                        Possible reasons:
+                        1. There is no such book
+                        2. This book has not been borrowed by more than one reader""");
             }
 
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | NumberFormatException e) {
             e.printStackTrace();
         }
     }

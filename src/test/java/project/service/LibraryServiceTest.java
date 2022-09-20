@@ -103,7 +103,7 @@ class LibraryServiceTest {
 
     @DisplayName("Test should successfully borrow book to reader")
     @Test
-    void shouldSuccessfullyBorrowBookToReader() throws SQLException {
+    void shouldSuccessfullyBorrowBookToReader() {
         int expectedBookId = 1;
         int expectedReaderId = 12;
         String userInput = expectedBookId + " / " + expectedReaderId;
@@ -128,14 +128,16 @@ class LibraryServiceTest {
 
     @DisplayName("Test should fail to borrow book to non existing reader")
     @Test
-    void shouldFailBorrowBookToReader() throws SQLException {
+    void shouldFailBorrowBookToReader() {
         int expectedBookId = 20;
         int expectedReaderId = 20;
         String userInput = expectedBookId + " / " + expectedReaderId;
 
         ArgumentCaptor<Integer> bookIdCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> readerIdCaptor = ArgumentCaptor.forClass(Integer.class);
-        when(libraryDAO.borrowBookIdToReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(false).thenThrow(new SQLException());
+        when(libraryDAO.borrowBookIdToReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(false).thenAnswer(invocationOnMock -> {
+            throw new SQLException();
+        });
 
         boolean flag = libraryService.borrowBook(userInput);
 

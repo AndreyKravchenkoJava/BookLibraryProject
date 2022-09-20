@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ReaderDAO {
 
-    public boolean save(Reader reader) throws IllegalArgumentException {
+    public boolean save(Reader reader) {
         boolean flag = false;
         final String SQL_SAVE_READER = "INSERT INTO reader(name) VALUES(?)";
 
@@ -22,7 +22,6 @@ public class ReaderDAO {
             preparedStatement.setString(1, reader.getName());
             preparedStatement.execute();
 
-            flag = true;
 
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
 
@@ -30,7 +29,10 @@ public class ReaderDAO {
                 reader.setId(resultSet.getInt("id"));
             }
 
+            flag = true;
+
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return flag;
@@ -50,6 +52,7 @@ public class ReaderDAO {
             }
 
         } catch (SQLException throwables) {
+            System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
         return readerList;
