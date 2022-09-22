@@ -1,7 +1,7 @@
 package project.dao;
 
 import project.connector.ConnectionCreator;
-import project.entity.Reader;
+import project.entity.Book;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,23 +10,25 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ReaderDAO {
+public class BookDaoPostgresqlImpl implements BookDao {
 
-    public boolean save(Reader reader) {
+    @Override
+    public boolean save(Book book) {
         boolean flag = false;
-        final String SQL_SAVE_READER = "INSERT INTO reader(name) VALUES(?)";
+        final String SQL_SAVE_BOOK = "INSERT INTO book(title, author) VALUES(?,?)";
 
         try (var connection = ConnectionCreator.createConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_READER, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_BOOK, Statement.RETURN_GENERATED_KEYS)) {
 
-            preparedStatement.setString(1, reader.getName());
+            preparedStatement.setString(1, book.getTitle());
+            preparedStatement.setString(2, book.getAuthor());
             preparedStatement.execute();
 
 
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
 
             if (resultSet.next()) {
-                reader.setId(resultSet.getInt("id"));
+                book.setId(resultSet.getInt("id"));
             }
 
             flag = true;
@@ -38,39 +40,42 @@ public class ReaderDAO {
         return flag;
     }
 
-    public List<Reader> findAll() {
-        List<Reader> readerList = new ArrayList<>();
-        final String SQL_FIND_ALL_READERS = "SELECT * FROM reader";
+    @Override
+    public List<Book> findAll() {
+        List<Book> bookList = new ArrayList<>();
+        final String SQL_FIND_ALL_BOOKS = "SELECT * FROM book";
 
         try (var connection = ConnectionCreator.createConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(SQL_FIND_ALL_READERS)) {
+             PreparedStatement preparedStatement = connection.prepareStatement(SQL_FIND_ALL_BOOKS)) {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                readerList.add(mapToReader(resultSet));
+                bookList.add(mapToBook(resultSet));
             }
 
         } catch (SQLException throwables) {
             System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
-        return readerList;
+        return bookList;
     }
 
-    private Reader mapToReader(ResultSet resultSet) {
-        Reader reader = new Reader();
+    private Book mapToBook(ResultSet resultSet) {
+        Book book = new Book();
 
         try {
             int id = resultSet.getInt("id");
-            String name = resultSet.getString("name");
+            String title = resultSet.getString("title");
+            String author = resultSet.getString("author");
 
-            reader.setId(id);
-            reader.setName(name);
+            book.setId(id);
+            book.setTitle(title);
+            book.setAuthor(author);
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        return reader;
+        return book;
     }
 }

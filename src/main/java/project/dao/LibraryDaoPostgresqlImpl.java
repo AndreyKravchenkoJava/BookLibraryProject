@@ -9,8 +9,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public class LibraryDAO {
+public class LibraryDaoPostgresqlImpl implements LibraryDao {
 
+    @Override
     public boolean borrowBookIdToReaderId(int bookId, int readerId) {
         boolean flag = false;
         final String SQL_SAVE_BORROWING = "INSERT INTO book_reader(book_id, reader_id) VALUES(?,?)";
@@ -31,6 +32,7 @@ public class LibraryDAO {
         return flag;
     }
 
+    @Override
     public boolean returnBookIdFromReaderId(int bookId, int readerId) {
         boolean flag = false;
         int amount = 0;
@@ -54,6 +56,7 @@ public class LibraryDAO {
         return flag;
     }
 
+    @Override
     public List<Book> findAllBorrowedBooksByReaderId(int readerId) {
         List<Book> bookList = new ArrayList<>();
         final String SQL_GET_READER_BORROWED_BOOK = "SELECT book.id AS book_id, book.title, book.author FROM book \n" +
@@ -78,6 +81,7 @@ public class LibraryDAO {
         return bookList;
     }
 
+    @Override
     public List<Reader> findAllReadersByBookId(int bookId) {
         List<Reader> readerList = new ArrayList<>();
         final String SQL_GET_READERS_BY_CURRENT_BOOK = "SELECT reader.id, reader.name FROM reader JOIN book_reader\n" +
@@ -103,6 +107,7 @@ public class LibraryDAO {
         return readerList;
     }
 
+    @Override
     public Map<Reader, List<Book>> findAllReadersAndBorrowedBooks() {
         Map<Reader, List<Book>> readerListMap = new HashMap<>();
         final String SQL_GET_ALL_READERS_AND_BORROWED_BOOK = "SELECT reader.id, reader.name, book.id AS book_id, book.title, book.author \n" +

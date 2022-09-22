@@ -4,24 +4,22 @@ import project.dao.*;
 import project.entity.Book;
 import project.entity.Reader;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 public class LibraryService {
-    private LibraryDAO libraryDAO = new LibraryDAO();
-    private BookDAO bookDAO = new BookDAO();
-    private ReaderDAO readerDAO = new ReaderDAO();
+    private LibraryDao libraryDao = new LibraryDaoPostgresqlImpl();
+    private BookDao bookDao = new BookDaoPostgresqlImpl();
+    private ReaderDao readerDao = new ReaderDaoPostgresqlImpl();
 
     public void showBooks() {
-        bookDAO.findAll().forEach(System.out::println);
+        bookDao.findAll().forEach(System.out::println);
     }
 
     public void showReaders() {
-        readerDAO.findAll().forEach(System.out::println);
+        readerDao.findAll().forEach(System.out::println);
     }
 
     public Book addBook(String input) {
@@ -38,7 +36,7 @@ public class LibraryService {
 
             if (matcher.find()) {
                 book = new Book(title, author);
-                bookDAO.save(book);
+                bookDao.save(book);
             } else {
                 throw new IllegalArgumentException("""
                         
@@ -66,7 +64,7 @@ public class LibraryService {
 
             if (matcher.find()) {
                 reader = new Reader(input);
-                readerDAO.save(reader);
+                readerDao.save(reader);
             } else {
                 throw new IllegalArgumentException("""
                         
@@ -92,7 +90,7 @@ public class LibraryService {
             int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
             int bookId = arrayIndicators[0];
             int readerId = arrayIndicators[1];
-            flag = libraryDAO.borrowBookIdToReaderId(bookId, readerId);
+            flag = libraryDao.borrowBookIdToReaderId(bookId, readerId);
 
         } catch (NumberFormatException e) {
             e.printStackTrace();
@@ -109,7 +107,7 @@ public class LibraryService {
             int bookId = arrayIndicators[0];
             int readerId = arrayIndicators[1];
 
-            flag = libraryDAO.returnBookIdFromReaderId(bookId, readerId);
+            flag = libraryDao.returnBookIdFromReaderId(bookId, readerId);
 
             if (!flag) {
                 throw new NoSuchElementException("""
@@ -133,8 +131,8 @@ public class LibraryService {
         try {
             int readerId = Integer.parseInt(input);
 
-            if (!libraryDAO.findAllBorrowedBooksByReaderId(readerId).isEmpty()) {
-                libraryDAO.findAllBorrowedBooksByReaderId(readerId).forEach(System.out::println);
+            if (!libraryDao.findAllBorrowedBooksByReaderId(readerId).isEmpty()) {
+                libraryDao.findAllBorrowedBooksByReaderId(readerId).forEach(System.out::println);
             } else {
                 throw new NoSuchElementException("""
                         
@@ -155,8 +153,8 @@ public class LibraryService {
         try {
             int bookId = Integer.parseInt(input);
 
-            if (!libraryDAO.findAllReadersByBookId(bookId).isEmpty()) {
-                libraryDAO.findAllReadersByBookId(bookId).forEach(System.out::println);
+            if (!libraryDao.findAllReadersByBookId(bookId).isEmpty()) {
+                libraryDao.findAllReadersByBookId(bookId).forEach(System.out::println);
             } else {
                 throw new NoSuchElementException("""
                         
@@ -173,18 +171,18 @@ public class LibraryService {
     }
 
     public void showAllReadersAndBorrowedBook() {
-        libraryDAO.findAllReadersAndBorrowedBooks().forEach((k, v) -> System.out.println(k + " : " + v));
+        libraryDao.findAllReadersAndBorrowedBooks().forEach((k, v) -> System.out.println(k + " : " + v));
     }
 
-    public void setLibraryDAO(LibraryDAO libraryDAO) {
-        this.libraryDAO = libraryDAO;
+    public void setLibraryDao(LibraryDao libraryDao) {
+        this.libraryDao = libraryDao;
     }
 
-    public void setBookDAO(BookDAO bookDAO) {
-        this.bookDAO = bookDAO;
+    public void setBookDao(BookDao bookDao) {
+        this.bookDao = bookDao;
     }
 
-    public void setReaderDAO(ReaderDAO readerDAO) {
-        this.readerDAO = readerDAO;
+    public void setReaderDao(ReaderDao readerDao) {
+        this.readerDao = readerDao;
     }
 }

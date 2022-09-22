@@ -4,9 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import project.dao.BookDAO;
-import project.dao.LibraryDAO;
-import project.dao.ReaderDAO;
+import project.dao.*;
 import project.entity.Book;
 import project.entity.Reader;
 
@@ -19,19 +17,19 @@ import static org.mockito.Mockito.*;
 
 class LibraryServiceTest {
     private LibraryService libraryService;
-    private LibraryDAO libraryDAO;
-    private BookDAO bookDAO;
-    private ReaderDAO readerDAO;
+    private LibraryDao libraryDao;
+    private BookDao bookDao;
+    private ReaderDao readerDao;
 
     @BeforeEach
     void setUp() {
         libraryService = new LibraryService();
-        libraryDAO = mock(LibraryDAO.class);
-        bookDAO = mock(BookDAO.class);
-        readerDAO = mock(ReaderDAO.class);
-        libraryService.setLibraryDAO(libraryDAO);
-        libraryService.setBookDAO(bookDAO);
-        libraryService.setReaderDAO(readerDAO);
+        libraryDao = mock(LibraryDaoPostgresqlImpl.class);
+        bookDao = mock(BookDaoPostgresqlImpl.class);
+        readerDao = mock(ReaderDaoPostgresqlImpl.class);
+        libraryService.setLibraryDao(libraryDao);
+        libraryService.setBookDao(bookDao);
+        libraryService.setReaderDao(readerDao);
     }
 
     @DisplayName("Test should successfully add new book")
@@ -43,7 +41,7 @@ class LibraryServiceTest {
         Book createdBook = libraryService.addBook(userInput);
 
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
-        verify(bookDAO, times(1)).save(captor.capture());
+        verify(bookDao, times(1)).save(captor.capture());
         Book bookToSave = captor.getValue();
 
         assertAll(
@@ -62,7 +60,7 @@ class LibraryServiceTest {
         String userInput = expectedTitle + " / " + expectedAuthor;
         Book createdBook = libraryService.addBook(userInput);
 
-        verify(bookDAO, never()).save(any());
+        verify(bookDao, never()).save(any());
 
         assertThat(createdBook).isNull();
 
@@ -77,7 +75,7 @@ class LibraryServiceTest {
         System.out.println(createdReader);
 
         ArgumentCaptor<Reader> captor = ArgumentCaptor.forClass(Reader.class);
-        verify(readerDAO, times(1)).save(captor.capture());
+        verify(readerDao, times(1)).save(captor.capture());
         Reader readerToSave = captor.getValue();
         System.out.println(readerToSave);
 
@@ -94,7 +92,7 @@ class LibraryServiceTest {
         String userInput = "Alexander Singeev 1";
         Reader createdReader = libraryService.addReaders(userInput);
 
-        verify(readerDAO, never()).save(any());
+        verify(readerDao, never()).save(any());
 
         assertThat(createdReader).isNull();
 
@@ -110,7 +108,7 @@ class LibraryServiceTest {
 
         ArgumentCaptor<Integer> bookIdCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> readerIdCaptor = ArgumentCaptor.forClass(Integer.class);
-        when(libraryDAO.borrowBookIdToReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(true);
+        when(libraryDao.borrowBookIdToReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(true);
 
         boolean flag = libraryService.borrowBook(userInput);
 
@@ -118,7 +116,7 @@ class LibraryServiceTest {
         int readerIdToSave = readerIdCaptor.getValue();
 
         assertAll(
-                () -> verify(libraryDAO, times(1)).borrowBookIdToReaderId(bookIdToSave, readerIdToSave),
+                () -> verify(libraryDao, times(1)).borrowBookIdToReaderId(bookIdToSave, readerIdToSave),
                 () -> assertThat(flag).isTrue(),
                 () -> assertThat(bookIdToSave).isEqualTo(expectedBookId),
                 () -> assertThat(readerIdToSave).isEqualTo(expectedReaderId)
@@ -135,7 +133,7 @@ class LibraryServiceTest {
 
         ArgumentCaptor<Integer> bookIdCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> readerIdCaptor = ArgumentCaptor.forClass(Integer.class);
-        when(libraryDAO.borrowBookIdToReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(false).thenAnswer(invocationOnMock -> {
+        when(libraryDao.borrowBookIdToReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(false).thenAnswer(invocationOnMock -> {
             throw new SQLException();
         });
 
@@ -145,7 +143,7 @@ class LibraryServiceTest {
         int readerIdToSave = readerIdCaptor.getValue();
 
         assertAll(
-                () -> verify(libraryDAO, times(1)).borrowBookIdToReaderId(bookIdToSave, readerIdToSave),
+                () -> verify(libraryDao, times(1)).borrowBookIdToReaderId(bookIdToSave, readerIdToSave),
                 () -> assertThat(flag).isFalse(),
                 () -> assertThat(bookIdToSave).isEqualTo(expectedBookId),
                 () -> assertThat(readerIdToSave).isEqualTo(expectedReaderId)
@@ -162,7 +160,7 @@ class LibraryServiceTest {
 
         ArgumentCaptor<Integer> bookIdCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> readerIdCaptor = ArgumentCaptor.forClass(Integer.class);
-        when(libraryDAO.returnBookIdFromReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(true);
+        when(libraryDao.returnBookIdFromReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(true);
 
         boolean flag = libraryService.returnBookToLibrary(userInput);
 
@@ -170,7 +168,7 @@ class LibraryServiceTest {
         int readerIdToSave = readerIdCaptor.getValue();
 
         assertAll(
-                () -> verify(libraryDAO, times(1)).returnBookIdFromReaderId(bookIdToSave, readerIdToSave),
+                () -> verify(libraryDao, times(1)).returnBookIdFromReaderId(bookIdToSave, readerIdToSave),
                 () -> assertThat(flag).isTrue(),
                 () -> assertThat(bookIdToSave).isEqualTo(expectedBookId),
                 () -> assertThat(readerIdToSave).isEqualTo(expectedReaderId)
@@ -186,7 +184,7 @@ class LibraryServiceTest {
 
         ArgumentCaptor<Integer> bookIdCaptor = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> readerIdCaptor = ArgumentCaptor.forClass(Integer.class);
-        when(libraryDAO.returnBookIdFromReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(false).thenThrow(new NoSuchElementException());
+        when(libraryDao.returnBookIdFromReaderId(bookIdCaptor.capture(), readerIdCaptor.capture())).thenReturn(false).thenThrow(new NoSuchElementException());
 
         boolean flag = libraryService.returnBookToLibrary(userInput);
 
@@ -194,7 +192,7 @@ class LibraryServiceTest {
         int readerIdToSave = readerIdCaptor.getValue();
 
         assertAll(
-                () -> verify(libraryDAO, times(1)).returnBookIdFromReaderId(bookIdToSave, readerIdToSave),
+                () -> verify(libraryDao, times(1)).returnBookIdFromReaderId(bookIdToSave, readerIdToSave),
                 () -> assertThat(flag).isFalse(),
                 () -> assertThat(bookIdToSave).isEqualTo(expectedBookId),
                 () -> assertThat(readerIdToSave).isEqualTo(expectedReaderId)
