@@ -123,7 +123,7 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
                 Reader reader = mapToReader(resultSet);
                 Book book = mapToBook(resultSet);
 
-                if (readerListMap.keySet().contains(reader)) {
+                if (readerListMap.containsKey(reader)) {
                     readerListMap.get(reader).add(book);
                 } else {
                     List<Book> books = new ArrayList<>();
