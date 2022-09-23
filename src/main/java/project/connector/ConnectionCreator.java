@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class ConnectionCreator {
     private static final String USER_NAME = "postgres";
-    private static final String PASSWORD = "Password1234";
+    private static final String PASSWORD = "Password12345";
     private static final String URL = "jdbc:postgresql://localhost/book_library_project";
 
     public ConnectionCreator() {
