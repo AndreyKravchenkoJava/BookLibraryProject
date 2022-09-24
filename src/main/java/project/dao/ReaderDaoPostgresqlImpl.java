@@ -13,8 +13,7 @@ import java.util.List;
 public class ReaderDaoPostgresqlImpl implements ReaderDao {
 
     @Override
-    public boolean save(Reader reader) {
-        boolean flag = false;
+    public Reader save(Reader reader) {
         final String SQL_SAVE_READER = "INSERT INTO reader(name) VALUES(?)";
 
         try (var connection = ConnectionCreator.createConnection();
@@ -30,13 +29,11 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
                 reader.setId(resultSet.getInt("id"));
             }
 
-            flag = true;
-
         } catch (SQLException throwables) {
             System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
-        return flag;
+        return reader;
     }
 
     @Override

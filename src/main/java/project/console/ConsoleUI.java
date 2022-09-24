@@ -58,7 +58,7 @@ public class ConsoleUI {
     private void addReaderToLibrary() {
         System.out.println("Please enter new reader full name!");
         String input = scanner.nextLine();
-        libraryService.addReaders(input);
+        libraryService.addReader(input);
     }
 
     private void addBookToLibrary() {

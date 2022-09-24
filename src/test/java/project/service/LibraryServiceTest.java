@@ -71,7 +71,7 @@ class LibraryServiceTest {
     @Test
     void shouldSuccessfullyAddNewReader() {
         String userInput = "Alexander Singeev";
-        Reader createdReader = libraryService.addReaders(userInput);
+        Reader createdReader = libraryService.addReader(userInput);
         System.out.println(createdReader);
 
         ArgumentCaptor<Reader> captor = ArgumentCaptor.forClass(Reader.class);
@@ -90,7 +90,7 @@ class LibraryServiceTest {
     @Test
     void shouldFailAddNewReader() {
         String userInput = "Alexander Singeev 1";
-        Reader createdReader = libraryService.addReaders(userInput);
+        Reader createdReader = libraryService.addReader(userInput);
 
         verify(readerDao, never()).save(any());
 

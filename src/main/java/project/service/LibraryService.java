@@ -55,7 +55,7 @@ public class LibraryService {
         return book;
     }
 
-    public Reader addReaders(String input) {
+    public Reader addReader(String input) {
         Reader reader = null;
 
         try {

@@ -13,8 +13,7 @@ import java.util.List;
 public class BookDaoPostgresqlImpl implements BookDao {
 
     @Override
-    public boolean save(Book book) {
-        boolean flag = false;
+    public Book save(Book book) {
         final String SQL_SAVE_BOOK = "INSERT INTO book(title, author) VALUES(?,?)";
 
         try (var connection = ConnectionCreator.createConnection();
@@ -31,13 +30,11 @@ public class BookDaoPostgresqlImpl implements BookDao {
                 book.setId(resultSet.getInt("id"));
             }
 
-            flag = true;
-
         } catch (SQLException throwables) {
             System.err.println("Fail DB: " + throwables.getSQLState());
             throwables.printStackTrace();
         }
-        return flag;
+        return book;
     }
 
     @Override
