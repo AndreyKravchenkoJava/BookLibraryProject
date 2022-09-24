@@ -1,19 +1,32 @@
 package project.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.sql.SQLException;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import project.dao.*;
+import project.dao.BookDao;
+import project.dao.BookDaoPostgresqlImpl;
+import project.dao.LibraryDao;
+import project.dao.LibraryDaoPostgresqlImpl;
+import project.dao.ReaderDao;
+import project.dao.ReaderDaoPostgresqlImpl;
 import project.entity.Book;
 import project.entity.Reader;
-
-import java.sql.SQLException;
-import java.util.NoSuchElementException;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.Mockito.*;
+import project.exception.JdbcDaoException;
 
 class LibraryServiceTest {
     private LibraryService libraryService;
@@ -50,6 +63,39 @@ class LibraryServiceTest {
                 () -> assertThat(expectedAuthor).isEqualTo(createdBook.getAuthor()),
                 () -> assertThat(createdBook).isEqualTo(bookToSave)
         );
+    }
+
+    @Test
+    void shouldFailToCreateNewBookWithInvalidAuthorName() {
+        var expectedErrorMessage = """
+                        Failed to create new book: invalid author name!
+                        
+                        1. Name must contain only letters
+                        2. Have more than two letters
+                        3. Maximum number of letters 100
+                        
+                        Fro example 'Danyl Zanuk'""";
+        var expectedTitle = "My life, my achievements";
+        var expectedAuthor = "Henry Ford 3";
+        var userInput = expectedTitle + " / " + expectedAuthor;
+
+        var exception = assertThrows(
+            IllegalArgumentException.class, () -> libraryService.addBook(userInput));
+        assertEquals(expectedErrorMessage, exception.getLocalizedMessage());
+    }
+
+    @Test
+    void shouldTrowJdbcExceptionWhenDaoFailsToSaveNewBook() {
+        var expectedErrorMessage = "some DB error message";
+        var expectedTitle = "My life, my achievements";
+        var expectedAuthor = "Henry Ford";
+        var userInput = expectedTitle + " / " + expectedAuthor;
+
+        when(bookDao.save(any())).thenThrow(new JdbcDaoException(expectedErrorMessage));
+
+        var exception = assertThrows(
+            JdbcDaoException.class, () -> libraryService.addBook(userInput));
+        assertEquals(expectedErrorMessage, exception.getLocalizedMessage());
     }
 
     @DisplayName("Test should fail to add new reader")

@@ -9,12 +9,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import project.exception.JdbcDaoException;
 
 public class BookDaoPostgresqlImpl implements BookDao {
 
     @Override
-    public boolean save(Book book) {
-        boolean flag = false;
+    public Book save(Book book) {
         final String SQL_SAVE_BOOK = "INSERT INTO book(title, author) VALUES(?,?)";
 
         try (var connection = ConnectionCreator.createConnection();
@@ -29,15 +29,14 @@ public class BookDaoPostgresqlImpl implements BookDao {
 
             if (resultSet.next()) {
                 book.setId(resultSet.getInt("id"));
+                return book;
+            } else {
+                throw new JdbcDaoException("Failed to fetch generated ID from DB while saving new book");
             }
-
-            flag = true;
-
-        } catch (SQLException throwables) {
-            System.err.println("Fail DB: " + throwables.getSQLState());
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Failed to save new book due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
-        return flag;
     }
 
     @Override

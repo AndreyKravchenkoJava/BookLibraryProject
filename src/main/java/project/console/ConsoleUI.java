@@ -64,7 +64,11 @@ public class ConsoleUI {
     private void addBookToLibrary() {
         System.out.println("Please enter new book name and author separated by “/”. Like this: name / author");
         String input = scanner.nextLine();
-        libraryService.addBook(input);
+        try {
+            libraryService.addBook(input);
+        } catch(RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 
     private void borrowBook() {

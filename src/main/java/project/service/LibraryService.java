@@ -23,9 +23,7 @@ public class LibraryService {
     }
 
     public Book addBook(String input) {
-        Book book = null;
 
-        try {
             String[] titleAndAuthorArray = input.split(" / ");
 
             String title = titleAndAuthorArray[0];
@@ -35,12 +33,11 @@ public class LibraryService {
             Matcher matcher = pattern.matcher(author);
 
             if (matcher.find()) {
-                book = new Book(title, author);
-                bookDao.save(book);
+                var book = new Book(title, author);
+                return bookDao.save(book);
             } else {
                 throw new IllegalArgumentException("""
-                        
-                        Fail when adding name!
+                        Failed to create new book: invalid author name!
                         
                         1. Name must contain only letters
                         2. Have more than two letters
@@ -48,11 +45,6 @@ public class LibraryService {
                         
                         Fro example 'Danyl Zanuk'""");
             }
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-        return book;
     }
 
     public Reader addReaders(String input) {
