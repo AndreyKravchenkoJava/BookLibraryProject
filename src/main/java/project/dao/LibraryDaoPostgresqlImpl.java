@@ -3,6 +3,7 @@ package project.dao;
 import project.connector.ConnectionCreator;
 import project.entity.Book;
 import project.entity.Reader;
+import project.exception.JdbcDaoException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,13 +22,10 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
 
             preparedStatement.setInt(1, bookId);
             preparedStatement.setInt(2, readerId);
-            preparedStatement.execute();
+            flag = preparedStatement.execute();
 
-            flag = true;
-
-        } catch (SQLException throwables) {
-            System.err.println("Fail DB: " + throwables.getSQLState());
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Failed to borrow book for reader due to DB error: " + e.getLocalizedMessage());
         }
         return flag;
     }
@@ -45,13 +43,15 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
             preparedStatement.setInt(2, readerId);
             amount = preparedStatement.executeUpdate();
 
-            if (amount == 1) {
+            if (amount > 0) {
                 flag = true;
+            } else {
+                throw new JdbcDaoException("Failed to return this book: no such borrowing exists");
             }
 
-        } catch (SQLException throwables) {
-            System.err.println("Fail DB: " + throwables.getSQLState());
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Failed to return book due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return flag;
     }
@@ -74,9 +74,13 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
                 bookList.add(mapToBook(resultSet));
             }
 
-        } catch (SQLException throwables) {
-            System.err.println("Fail DB: " + throwables.getSQLState());
-            throwables.printStackTrace();
+            if (bookList.isEmpty()) {
+                throw new JdbcDaoException("Failed to show all borrowed books by reader Id: this reader did not borrow books");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to find all borrowed books by reader Id due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return bookList;
     }
@@ -100,9 +104,13 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
                 readerList.add(mapToReader(resultSet));
             }
 
-        } catch (SQLException throwables) {
-            System.err.println("Fail DB: " + throwables.getSQLState());
-            throwables.printStackTrace();
+            if (readerList.isEmpty()) {
+                throw new JdbcDaoException("Failed to show all readers by book Id: this book was not borrowed by readers");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to find all readers by book Id due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return readerList;
     }

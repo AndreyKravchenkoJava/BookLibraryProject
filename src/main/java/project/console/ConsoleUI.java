@@ -5,9 +5,9 @@ import project.service.LibraryService;
 import java.util.Scanner;
 
 public class ConsoleUI {
-    private LibraryService libraryService = new LibraryService();
+    private final LibraryService libraryService = new LibraryService();
 
-    private Scanner scanner = new Scanner(System.in);
+    private final Scanner scanner = new Scanner(System.in);
 
     public void run() {
         System.out.println("Welcome to the library!");
@@ -58,36 +58,68 @@ public class ConsoleUI {
     private void addReaderToLibrary() {
         System.out.println("Please enter new reader full name!");
         String input = scanner.nextLine();
-        libraryService.addReader(input);
+        try {
+            if (libraryService.addReader(input) != null) {
+                System.out.println("Reader added successfully");
+            }
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 
     private void addBookToLibrary() {
         System.out.println("Please enter new book name and author separated by “/”. Like this: name / author");
         String input = scanner.nextLine();
-        libraryService.addBook(input);
+        try {
+            if (libraryService.addBook(input) != null) {
+                System.out.println("Book added successfully");
+            }
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 
     private void borrowBook() {
         System.out.println("Please enter bookId and readerId separated by “/” for borrow. Like this: bookId / readerId");
         String input = scanner.nextLine();
-        libraryService.borrowBook(input);
+        try {
+            if (libraryService.borrowBook(input)) {
+                System.out.println("Book successfully borrowed");
+            }
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 
     private void returnBookToLibrary() {
         System.out.println("Please enter bookId and readerId to return the book to the library. Like this: bookId / readerId");
         String input = scanner.nextLine();
-        libraryService.returnBookToLibrary(input);
+        try {
+            if (libraryService.returnBookToLibrary(input)) {
+                System.out.println("Book successfully returned");
+            }
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 
     private void showAllBorrowedBooksByReaderId() {
         System.out.println("Please enter readerID");
         String input = scanner.nextLine();
-        libraryService.showAllBorrowedBooksReader(input);
+        try {
+            libraryService.showAllBorrowedBooksReader(input);
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 
     private void showAllReadersByCurrentBook() {
         System.out.println("Please enter bookId");
         String input = scanner.nextLine();
-        libraryService.showReadersCurrentBook(input);
+        try {
+            libraryService.showReadersCurrentBook(input);
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 }

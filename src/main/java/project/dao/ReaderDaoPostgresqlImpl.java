@@ -2,6 +2,7 @@ package project.dao;
 
 import project.connector.ConnectionCreator;
 import project.entity.Reader;
+import project.exception.JdbcDaoException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ReaderDaoPostgresqlImpl implements ReaderDao {
 
@@ -27,13 +29,38 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
 
             if (resultSet.next()) {
                 reader.setId(resultSet.getInt("id"));
+            } else {
+                throw new JdbcDaoException("Failed to fetch generated ID from DB while saving new reader");
             }
 
-        } catch (SQLException throwables) {
-            System.err.println("Fail DB: " + throwables.getSQLState());
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Failed to save new reader due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return reader;
+    }
+
+    @Override
+    public Optional<Reader> findById(int readerId) {
+        final String SQL_FIND_READER_BY_ID = "SELECT * FROM reader WHERE id = (?)";
+        Reader reader;
+
+        try (var connection = ConnectionCreator.createConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SQL_FIND_READER_BY_ID)) {
+
+            preparedStatement.setInt(1, readerId);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()) {
+                reader = mapToReader(resultSet);
+                return Optional.ofNullable(reader);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to find reader by Id due to DB error: " + e.getLocalizedMessage());
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -50,9 +77,8 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
                 readerList.add(mapToReader(resultSet));
             }
 
-        } catch (SQLException throwables) {
-            System.err.println("Fail DB: " + throwables.getSQLState());
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Failed to find all readers due to DB error: " + e.getLocalizedMessage());
         }
         return readerList;
     }
@@ -67,8 +93,8 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
             reader.setId(id);
             reader.setName(name);
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Failed to read reader due to DB error: " + e.getLocalizedMessage());
         }
         return reader;
     }

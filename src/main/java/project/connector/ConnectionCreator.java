@@ -12,8 +12,13 @@ public class ConnectionCreator {
     public ConnectionCreator() {
     }
 
-    public static Connection createConnection() throws SQLException {
-
-        return DriverManager.getConnection(URL, USER_NAME, PASSWORD);
+    public static Connection createConnection() {
+        try {
+            return DriverManager.getConnection(URL, USER_NAME, PASSWORD);
+        } catch (SQLException e) {
+            System.err.println("Failed to connect DB: " + e.getLocalizedMessage());
+            System.exit(1);
+        }
+        return null;
     }
 }

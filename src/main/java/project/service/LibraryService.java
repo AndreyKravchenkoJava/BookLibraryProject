@@ -23,52 +23,34 @@ public class LibraryService {
     }
 
     public Book addBook(String input) {
-        Book book = null;
 
-        try {
-            String[] titleAndAuthorArray = input.split(" / ");
+        String[] titleAndAuthorArray = input.split(" / ");
+        String title = titleAndAuthorArray[0];
+        String author = titleAndAuthorArray[1];
 
-            String title = titleAndAuthorArray[0];
-            String author = titleAndAuthorArray[1];
-
-            Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
-            Matcher matcher = pattern.matcher(author);
-
-            if (matcher.find()) {
-                book = new Book(title, author);
-                bookDao.save(book);
+            if (parserName(author)) {
+                Book book = new Book(title, author);
+                return bookDao.save(book);
             } else {
                 throw new IllegalArgumentException("""
+                         Failed to create new book: invalid author name!
                         
-                        Fail when adding name!
+                         1. Name must contain only letters
+                         2. Have more than two letters
+                         3. Maximum number of letters 100
                         
-                        1. Name must contain only letters
-                        2. Have more than two letters
-                        3. Maximum number of letters 100
-                        
-                        Fro example 'Danyl Zanuk'""");
+                         Fro example 'Danyl Zanuk'""");
             }
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-        return book;
     }
 
     public Reader addReader(String input) {
-        Reader reader = null;
 
-        try {
-            Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
-            Matcher matcher = pattern.matcher(input);
-
-            if (matcher.find()) {
-                reader = new Reader(input);
-                readerDao.save(reader);
+            if (parserName(input)) {
+                Reader reader = new Reader(input);
+                return readerDao.save(reader);
             } else {
-                throw new IllegalArgumentException("""
-                        
-                        Fail when adding name!
+                throw new IllegalArgumentException("""                       
+                        Failed to create new reader: invalid author name!
                         
                         1. Name must contain only letters
                         2. Have more than two letters
@@ -76,98 +58,94 @@ public class LibraryService {
                         
                         Fro example 'Danyl Zanuk'""");
             }
-
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-        return reader;
     }
 
     public boolean borrowBook(String input) {
-        boolean flag = false;
 
-        try {
+        if (parseTwoId(input)) {
             int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
             int bookId = arrayIndicators[0];
             int readerId = arrayIndicators[1];
-            flag = libraryDao.borrowBookIdToReaderId(bookId, readerId);
+            return libraryDao.borrowBookIdToReaderId(bookId, readerId);
+        } else {
+            throw new NumberFormatException("""                       
+                        Failed to borrow book: invalid input!
+                        
+                        1. You must enter only numbers
+                        2. The input must match the example
 
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
+                        Fro example '50 / 50'""");
         }
-
-        return flag;
     }
 
     public boolean returnBookToLibrary(String input) {
-        boolean flag = false;
+        int bookId = 0;
+        int readerId = 0;
 
-        try {
+        if (parseTwoId(input)) {
             int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
-            int bookId = arrayIndicators[0];
-            int readerId = arrayIndicators[1];
-
-            flag = libraryDao.returnBookIdFromReaderId(bookId, readerId);
-
-            if (!flag) {
-                throw new NoSuchElementException("""
+            bookId = arrayIndicators[0];
+            readerId = arrayIndicators[1];
+        } else {
+            throw new NumberFormatException("""                       
+                        Failed to return book: invalid input!
                         
-                        Fail when returning book in Library!
-                        
-                        Possible reasons:
-                        1. There is no such book
-                        2. There is no such reader
-                        3. Reader with this Id has not borrowed a book with this Id""");
-            }
+                        1. You must enter only numbers
+                        2. The input must match the example
 
-        } catch (NoSuchElementException | NumberFormatException e) {
-            e.printStackTrace();
+                        Fro example '50 / 50'""");
         }
-        return flag;
+
+        if (bookDao.findById(bookId).isPresent() && readerDao.findById(readerId).isPresent()) {
+            return libraryDao.returnBookIdFromReaderId(bookId, readerId);
+        } else {
+            throw new NoSuchElementException("Failed to return book: there is no such book or reader in the library!");
+        }
     }
 
     public void showAllBorrowedBooksReader(String input) {
+        int readerId = 0;
 
-        try {
-            int readerId = Integer.parseInt(input);
-
-            if (!libraryDao.findAllBorrowedBooksByReaderId(readerId).isEmpty()) {
-                libraryDao.findAllBorrowedBooksByReaderId(readerId).forEach(System.out::println);
-            } else {
-                throw new NoSuchElementException("""
+        if (parseId(input)) {
+            readerId = Integer.parseInt(input);
+        } else {
+            throw new NumberFormatException("""                       
+                        Failed to show all borrowed books by reader Id: invalid input!
                         
-                        Fail when show borrowed books by readers:
-                        
-                        Possible reasons:
-                        1. There is no such reader
-                        2. The reader did not borrow the books""");
-            }
+                        1. You must enter only number
+                        2. The input must match the example
 
-        } catch (NoSuchElementException | NumberFormatException e) {
-            e.printStackTrace();
+                        Fro example '5'""");
+        }
+
+        if (readerDao.findById(readerId).isPresent()) {
+            libraryDao.findAllBorrowedBooksByReaderId(readerId).forEach(System.out::println);
+        } else {
+            throw new NoSuchElementException("Failed to show all borrowed books by reader Id: there is no such reader in the library");
         }
     }
 
     public void showReadersCurrentBook(String input) {
+        int bookId = 0;
 
-        try {
-            int bookId = Integer.parseInt(input);
-
-            if (!libraryDao.findAllReadersByBookId(bookId).isEmpty()) {
-                libraryDao.findAllReadersByBookId(bookId).forEach(System.out::println);
-            } else {
-                throw new NoSuchElementException("""
+        if (parseId(input)) {
+            bookId = Integer.parseInt(input);
+        } else {
+            throw new NumberFormatException("""                       
+                        Failed to show all readers by book Id: invalid input!
                         
-                        Fail when show reader by current book:
-                        
-                        Possible reasons:
-                        1. There is no such book
-                        2. This book has not been borrowed by more than one reader""");
-            }
+                        1. You must enter only number
+                        2. The input must match the example
 
-        } catch (NoSuchElementException | NumberFormatException e) {
-            e.printStackTrace();
+                        Fro example '5'""");
         }
+
+        if (bookDao.findById(bookId).isPresent()) {
+            libraryDao.findAllReadersByBookId(bookId).forEach(System.out::println);
+        } else {
+            throw new NoSuchElementException("Failed to show all readers by book Id: there is no such book in the library");
+        }
+
     }
 
     public void showAllReadersAndBorrowedBook() {
@@ -184,5 +162,38 @@ public class LibraryService {
 
     public void setReaderDao(ReaderDao readerDao) {
         this.readerDao = readerDao;
+    }
+
+    private boolean parserName(String name) {
+        Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
+        Matcher matcher = pattern.matcher(name);
+
+        if (matcher.find()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean parseTwoId(String input) {
+        Pattern pattern = Pattern.compile("^\\d+\\s\\/\\s\\d+");
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean parseId(String input) {
+        Pattern pattern = Pattern.compile("\\d");
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
