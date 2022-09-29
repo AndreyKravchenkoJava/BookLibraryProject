@@ -22,15 +22,15 @@ public class ConsoleUI {
         String choice = scanner.nextLine();
 
         switch (choice) {
-            case "1" -> libraryService.showBooks();
-            case "2" -> libraryService.showReaders();
+            case "1" -> showAllBooksInLibrary();
+            case "2" -> showAllReadersInLibrary();
             case "3" -> addReaderToLibrary();
             case "4" -> addBookToLibrary();
-            case "5" -> borrowBook();
+            case "5" -> borrowBookFromLibrary();
             case "6" -> returnBookToLibrary();
-            case "7" -> showAllBorrowedBooksByReaderId();
+            case "7" -> showAllBorrowedBooksByReader();
             case "8" -> showAllReadersByCurrentBook();
-            case "9" -> libraryService.showAllReadersAndBorrowedBook();
+            case "9" -> showAllReadersAndBorrowedBooks();
             case "exit" -> {
                 System.out.println("Goodbye!");
                 System.exit(0);
@@ -53,6 +53,22 @@ public class ConsoleUI {
                 
                 Type 'exit' to stop program and exit!
                 """);
+    }
+
+    private void showAllBooksInLibrary() {
+        try {
+            libraryService.showBooks().forEach(System.out::println);
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
+    }
+
+    private void showAllReadersInLibrary() {
+        try {
+            libraryService.showReaders().forEach(System.out::println);
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
     }
 
     private void addReaderToLibrary() {
@@ -79,7 +95,7 @@ public class ConsoleUI {
         }
     }
 
-    private void borrowBook() {
+    private void borrowBookFromLibrary() {
         System.out.println("Please enter bookId and readerId separated by “/” for borrow. Like this: bookId / readerId");
         String input = scanner.nextLine();
         try {
@@ -103,11 +119,11 @@ public class ConsoleUI {
         }
     }
 
-    private void showAllBorrowedBooksByReaderId() {
+    private void showAllBorrowedBooksByReader() {
         System.out.println("Please enter readerID");
         String input = scanner.nextLine();
         try {
-            libraryService.showAllBorrowedBooksReader(input);
+            libraryService.showAllBorrowedBooksByReader(input);
         } catch (RuntimeException e) {
             System.err.println(e.getLocalizedMessage());
         }
@@ -117,7 +133,15 @@ public class ConsoleUI {
         System.out.println("Please enter bookId");
         String input = scanner.nextLine();
         try {
-            libraryService.showReadersCurrentBook(input);
+            libraryService.showReadersByCurrentBook(input);
+        } catch (RuntimeException e) {
+            System.err.println(e.getLocalizedMessage());
+        }
+    }
+
+    private void showAllReadersAndBorrowedBooks() {
+        try {
+            libraryService.showAllReadersAndBorrowedBooks().forEach((r, b) -> System.out.println(r + " : " + b));
         } catch (RuntimeException e) {
             System.err.println(e.getLocalizedMessage());
         }

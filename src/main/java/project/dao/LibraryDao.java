@@ -9,7 +9,7 @@ import java.util.Map;
 public interface LibraryDao {
     boolean borrowBookIdToReaderId(int bookId, int readerId);
 
-    boolean returnBookIdFromReaderId(int bookId, int readerId);
+    boolean returnByBookIdAndReaderId(int bookId, int readerId);
 
     List<Book> findAllBorrowedBooksByReaderId(int readerId);
 

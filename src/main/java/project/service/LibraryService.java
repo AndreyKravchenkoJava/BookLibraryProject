@@ -4,8 +4,7 @@ import project.dao.*;
 import project.entity.Book;
 import project.entity.Reader;
 
-import java.util.Arrays;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,12 +13,20 @@ public class LibraryService {
     private BookDao bookDao = new BookDaoPostgresqlImpl();
     private ReaderDao readerDao = new ReaderDaoPostgresqlImpl();
 
-    public void showBooks() {
-        bookDao.findAll().forEach(System.out::println);
+    public List<Book> showBooks() {
+        if (!bookDao.findAll().isEmpty()) {
+            return bookDao.findAll();
+        } else {
+            throw new NoSuchElementException("Failed to show all books: there are no books in the Library");
+        }
     }
 
-    public void showReaders() {
-        readerDao.findAll().forEach(System.out::println);
+    public List<Reader> showReaders() {
+        if (!readerDao.findAll().isEmpty()) {
+            return readerDao.findAll();
+        } else {
+            throw new NoSuchElementException("Failed to show all readers: there are no readers in the Library");
+        }
     }
 
     public Book addBook(String input) {
@@ -61,12 +68,13 @@ public class LibraryService {
     }
 
     public boolean borrowBook(String input) {
+        int bookId;
+        int readerId;
 
         if (parseTwoId(input)) {
             int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
-            int bookId = arrayIndicators[0];
-            int readerId = arrayIndicators[1];
-            return libraryDao.borrowBookIdToReaderId(bookId, readerId);
+            bookId = arrayIndicators[0];
+            readerId = arrayIndicators[1];
         } else {
             throw new NumberFormatException("""                       
                         Failed to borrow book: invalid input!
@@ -76,11 +84,17 @@ public class LibraryService {
 
                         Fro example '50 / 50'""");
         }
+
+        if (bookDao.findById(bookId).isPresent() && readerDao.findById(readerId).isPresent()) {
+            return libraryDao.borrowBookIdToReaderId(bookId, readerId);
+        } else {
+            throw new NoSuchElementException("Failed to return book: there is no such book or reader in the Library!");
+        }
     }
 
     public boolean returnBookToLibrary(String input) {
-        int bookId = 0;
-        int readerId = 0;
+        int bookId;
+        int readerId;
 
         if (parseTwoId(input)) {
             int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
@@ -97,16 +111,16 @@ public class LibraryService {
         }
 
         if (bookDao.findById(bookId).isPresent() && readerDao.findById(readerId).isPresent()) {
-            return libraryDao.returnBookIdFromReaderId(bookId, readerId);
+            return libraryDao.returnByBookIdAndReaderId(bookId, readerId);
         } else {
-            throw new NoSuchElementException("Failed to return book: there is no such book or reader in the library!");
+            throw new NoSuchElementException("Failed to return book: there is no such book or reader in the Library!");
         }
     }
 
-    public void showAllBorrowedBooksReader(String input) {
-        int readerId = 0;
+    public void showAllBorrowedBooksByReader(String input) {
+        int readerId;
 
-        if (parseId(input)) {
+        if (parseOneId(input)) {
             readerId = Integer.parseInt(input);
         } else {
             throw new NumberFormatException("""                       
@@ -121,14 +135,14 @@ public class LibraryService {
         if (readerDao.findById(readerId).isPresent()) {
             libraryDao.findAllBorrowedBooksByReaderId(readerId).forEach(System.out::println);
         } else {
-            throw new NoSuchElementException("Failed to show all borrowed books by reader Id: there is no such reader in the library");
+            throw new NoSuchElementException("Failed to show all borrowed books by reader Id: there is no such reader in the Library");
         }
     }
 
-    public void showReadersCurrentBook(String input) {
-        int bookId = 0;
+    public void showReadersByCurrentBook(String input) {
+        int bookId;
 
-        if (parseId(input)) {
+        if (parseOneId(input)) {
             bookId = Integer.parseInt(input);
         } else {
             throw new NumberFormatException("""                       
@@ -143,13 +157,17 @@ public class LibraryService {
         if (bookDao.findById(bookId).isPresent()) {
             libraryDao.findAllReadersByBookId(bookId).forEach(System.out::println);
         } else {
-            throw new NoSuchElementException("Failed to show all readers by book Id: there is no such book in the library");
+            throw new NoSuchElementException("Failed to show all readers by book Id: there is no such book in the Library");
         }
 
     }
 
-    public void showAllReadersAndBorrowedBook() {
-        libraryDao.findAllReadersAndBorrowedBooks().forEach((k, v) -> System.out.println(k + " : " + v));
+    public Map<Reader, List<Book>> showAllReadersAndBorrowedBooks() {
+        if (!libraryDao.findAllReadersAndBorrowedBooks().isEmpty()) {
+            return libraryDao.findAllReadersAndBorrowedBooks();
+        } else {
+            throw new NoSuchElementException("Failed to show all readers and borrowed books: not one reader borrowed a book");
+        }
     }
 
     public void setLibraryDao(LibraryDao libraryDao) {
@@ -175,6 +193,17 @@ public class LibraryService {
         }
     }
 
+    private boolean parseOneId(String input) {
+        Pattern pattern = Pattern.compile("\\d");
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     private boolean parseTwoId(String input) {
         Pattern pattern = Pattern.compile("^\\d+\\s\\/\\s\\d+");
         Matcher matcher = pattern.matcher(input);
@@ -186,14 +215,4 @@ public class LibraryService {
         }
     }
 
-    private boolean parseId(String input) {
-        Pattern pattern = Pattern.compile("\\d");
-        Matcher matcher = pattern.matcher(input);
-
-        if (matcher.find()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }

@@ -31,9 +31,9 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
     }
 
     @Override
-    public boolean returnBookIdFromReaderId(int bookId, int readerId) {
+    public boolean returnByBookIdAndReaderId(int bookId, int readerId) {
         boolean flag = false;
-        int amount = 0;
+        int amount;
         final String SQL_DELETE_BORROWING = "DELETE FROM book_reader WHERE book_id = (?) AND reader_id = (?)";
 
         try (var connection = ConnectionCreator.createConnection();
@@ -140,9 +140,8 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
                 }
             }
 
-        } catch (SQLException throwables) {
-            System.err.println("Fail DB: " + throwables.getSQLState());
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            System.err.println("Failed to find all readers and borrowed books due to DB error: " + e.getSQLState());
         }
         return readerListMap;
     }
