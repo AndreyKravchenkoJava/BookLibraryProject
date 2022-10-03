@@ -8,8 +8,8 @@ import project.dao.*;
 import project.entity.Book;
 import project.entity.Reader;
 import project.exception.JdbcDaoException;
+import project.exception.LibraryServiceException;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -57,6 +57,30 @@ class LibraryServiceTest {
         );
     }
 
+    @DisplayName("Test should fail to add new book with empty input")
+    @Test
+    void shouldFailToAddNewBookWithEmptyInput() {
+        String userInput = "";
+        String expectedErrorMessage = "Failed to create new book: input cannot be empty";
+
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.addBook(userInput));
+
+        assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
+    }
+
+    @DisplayName("Test should fail to add new book without separated")
+    @Test
+    void shouldFailToAddNewBookWithoutSeparated() {
+        String expectedTitle = "My life, my achievements";
+        String expectedAuthor = "Henry Ford 33333";
+        String userInput = expectedTitle + " " + expectedAuthor;
+        String expectedErrorMessage = "Failed to create new book: input should be separated ' / '";
+
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.addBook(userInput));
+
+        assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
+    }
+
     @DisplayName("Test should fail to add new book with invalid author name")
     @Test
     void shouldFailToAddNewBookWithInvalidAuthorName() {
@@ -73,7 +97,7 @@ class LibraryServiceTest {
                          Fro example 'Danyl Zanuk'""";
 
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> libraryService.addBook(userInput));
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.addBook(userInput));
 
         assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
     }
@@ -112,12 +136,23 @@ class LibraryServiceTest {
         );
     }
 
+    @DisplayName("Test should fail to add new reader with empty input")
+    @Test
+    void shouldFailToAddNewReaderWithEmptyInput() {
+        String userInput = "";
+        String expectedErrorMessage = "Failed to create new reader: input cannot be empty";
+
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.addReader(userInput));
+
+        assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
+    }
+
     @DisplayName("Test should fail to add new reader with invalid name")
     @Test
     void shouldFailToAddNewReaderWithInvalidName() {
         String userInput = "Alexander Singeev 1";
         String expectedErrorMessage = """                       
-                        Failed to create new reader: invalid author name!
+                        Failed to create new reader: invalid reader name!
                         
                         1. Name must contain only letters
                         2. Have more than two letters
@@ -126,7 +161,7 @@ class LibraryServiceTest {
                         Fro example 'Danyl Zanuk'""";
 
 
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> libraryService.addReader(userInput));
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.addReader(userInput));
 
         assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
     }
@@ -179,12 +214,14 @@ class LibraryServiceTest {
         String expectedErrorMessage = """                       
                         Failed to borrow book: invalid input!
                         
-                        1. You must enter only numbers
-                        2. The input must match the example
+                        1. The input cannot be empty
+                        2. Input should be separated ' / '
+                        2. You must enter only numbers
+                        3. The input must match the example
 
                         Fro example '50 / 50'""";
 
-        Exception exception = assertThrows(NumberFormatException.class, () -> libraryService.borrowBook(userInput));
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.borrowBook(userInput));
 
         assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
     }
@@ -197,7 +234,7 @@ class LibraryServiceTest {
         String userInput = expectedBookId + " / " + expectedReaderId;
         String expectedErrorMessage = "Failed to return book: there is no such book or reader in the Library!";
 
-        Exception exception = assertThrows(NoSuchElementException.class, () -> libraryService.borrowBook(userInput));
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.borrowBook(userInput));
 
         assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
     }
@@ -237,12 +274,14 @@ class LibraryServiceTest {
         String expectedErrorMessage = """                       
                         Failed to return book: invalid input!
                         
-                        1. You must enter only numbers
-                        2. The input must match the example
+                        1. The input cannot be empty
+                        2. Input should be separated ' / '
+                        2. You must enter only numbers
+                        3. The input must match the example
 
                         Fro example '50 / 50'""";
 
-        Exception exception = assertThrows(NumberFormatException.class, () -> libraryService.returnBookToLibrary(userInput));
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.returnBookToLibrary(userInput));
 
         assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
     }
@@ -255,7 +294,7 @@ class LibraryServiceTest {
         String userInput = expectedBookId + " / " + expectedReaderId;
         String expectedErrorMessage = "Failed to return book: there is no such book or reader in the Library!";
 
-        Exception exception = assertThrows(NoSuchElementException.class, () -> libraryService.returnBookToLibrary(userInput));
+        Exception exception = assertThrows(LibraryServiceException.class, () -> libraryService.returnBookToLibrary(userInput));
 
         assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
     }

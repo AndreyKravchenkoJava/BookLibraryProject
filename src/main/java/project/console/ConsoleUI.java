@@ -5,9 +5,9 @@ import project.service.LibraryService;
 import java.util.Scanner;
 
 public class ConsoleUI {
-    private final LibraryService libraryService = new LibraryService();
+    private LibraryService libraryService = new LibraryService();
 
-    private final Scanner scanner = new Scanner(System.in);
+    private Scanner scanner = new Scanner(System.in);
 
     public void run() {
         System.out.println("Welcome to the library!");
@@ -57,7 +57,7 @@ public class ConsoleUI {
 
     private void showAllBooksInLibrary() {
         try {
-            libraryService.showBooks().forEach(System.out::println);
+            libraryService.showBooks();
         } catch (RuntimeException e) {
             System.err.println(e.getLocalizedMessage());
         }
@@ -65,7 +65,7 @@ public class ConsoleUI {
 
     private void showAllReadersInLibrary() {
         try {
-            libraryService.showReaders().forEach(System.out::println);
+            libraryService.showReaders();
         } catch (RuntimeException e) {
             System.err.println(e.getLocalizedMessage());
         }
@@ -141,7 +141,7 @@ public class ConsoleUI {
 
     private void showAllReadersAndBorrowedBooks() {
         try {
-            libraryService.showAllReadersAndBorrowedBooks().forEach((r, b) -> System.out.println(r + " : " + b));
+            libraryService.showAllReadersAndBorrowedBooks();
         } catch (RuntimeException e) {
             System.err.println(e.getLocalizedMessage());
         }

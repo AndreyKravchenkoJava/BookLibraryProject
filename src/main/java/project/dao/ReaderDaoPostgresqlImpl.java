@@ -29,6 +29,8 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
 
             if (resultSet.next()) {
                 reader.setId(resultSet.getInt("id"));
+                resultSet.close();
+                return reader;
             } else {
                 throw new JdbcDaoException("Failed to fetch generated ID from DB while saving new reader");
             }
@@ -37,7 +39,6 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
             System.err.println("Failed to save new reader due to DB error: " + e.getLocalizedMessage());
             throw new JdbcDaoException(e);
         }
-        return reader;
     }
 
     @Override
@@ -56,6 +57,8 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
                 reader = mapToReader(resultSet);
                 return Optional.ofNullable(reader);
             }
+
+            resultSet.close();
 
         } catch (SQLException e) {
             System.err.println("Failed to find reader by Id due to DB error: " + e.getLocalizedMessage());
@@ -76,6 +79,8 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
             while (resultSet.next()) {
                 readerList.add(mapToReader(resultSet));
             }
+
+            resultSet.close();
 
         } catch (SQLException e) {
             System.err.println("Failed to find all readers due to DB error: " + e.getLocalizedMessage());

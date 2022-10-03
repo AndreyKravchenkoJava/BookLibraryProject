@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public class BookDaoPostgresqlImpl implements BookDao {
 
+    //ЗАКРОЙ РЕЗУЛЬТ СЕТЫ
+
     @Override
     public Book save(Book book) {
         final String SQL_SAVE_BOOK = "INSERT INTO book(title, author) VALUES(?,?)";
@@ -30,10 +32,12 @@ public class BookDaoPostgresqlImpl implements BookDao {
 
             if (resultSet.next()) {
                 book.setId(resultSet.getInt("id"));
+                resultSet.close();
                 return book;
             } else {
                 throw new JdbcDaoException("Failed to fetch generated ID from DB while saving new book");
             }
+
 
         } catch (SQLException e) {
             System.err.println("Failed to save new book due to DB error: " + e.getLocalizedMessage());
@@ -58,6 +62,8 @@ public class BookDaoPostgresqlImpl implements BookDao {
                 return Optional.ofNullable(book);
             }
 
+            resultSet.close();
+
         } catch (SQLException e) {
             System.err.println("Failed to find book by Id due to DB error: " + e.getLocalizedMessage());
         }
@@ -77,6 +83,8 @@ public class BookDaoPostgresqlImpl implements BookDao {
             while (resultSet.next()) {
                 bookList.add(mapToBook(resultSet));
             }
+
+            resultSet.close();
 
         } catch (SQLException e) {
             System.err.println("Failed to find all books due to DB error: " + e.getLocalizedMessage());
