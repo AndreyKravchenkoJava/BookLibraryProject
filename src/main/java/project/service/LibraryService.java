@@ -25,7 +25,7 @@ public class LibraryService {
         if (!readerDao.findAll().isEmpty()) {
             readerDao.findAll().forEach(System.out::println);
         } else {
-            System.out.printf("There are no readers in the Library");
+            System.out.println("There are no readers in the Library");
         }
     }
 
