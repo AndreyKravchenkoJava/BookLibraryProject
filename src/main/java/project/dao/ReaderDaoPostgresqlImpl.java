@@ -24,7 +24,6 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
             preparedStatement.setString(1, reader.getName());
             preparedStatement.execute();
 
-
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
 
             if (resultSet.next()) {
@@ -36,7 +35,6 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
             }
 
         } catch (SQLException e) {
-            System.err.println("Failed to save new reader due to DB error: " + e.getLocalizedMessage());
             throw new JdbcDaoException(e);
         }
     }
@@ -55,13 +53,13 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
 
             while (resultSet.next()) {
                 reader = mapToReader(resultSet);
-                return Optional.ofNullable(reader);
+                return Optional.of(reader);
             }
 
             resultSet.close();
 
         } catch (SQLException e) {
-            System.err.println("Failed to find reader by Id due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return Optional.empty();
     }
@@ -83,7 +81,7 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
             resultSet.close();
 
         } catch (SQLException e) {
-            System.err.println("Failed to find all readers due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return readerList;
     }
@@ -99,7 +97,7 @@ public class ReaderDaoPostgresqlImpl implements ReaderDao {
             reader.setName(name);
 
         } catch (SQLException e) {
-            System.err.println("Failed to read reader due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return reader;
     }

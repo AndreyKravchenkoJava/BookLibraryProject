@@ -50,7 +50,7 @@ public class ConsoleUI {
                 [7] Show all borrowed book by user Id
                 [8] Show current reader of a book with Id
                 [9] Show all readers and borrowed book
-                
+                                
                 Type 'exit' to stop program and exit!
                 """);
     }
@@ -59,7 +59,7 @@ public class ConsoleUI {
         try {
             libraryService.showBooks();
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to find all books due to DB error: " + e.getLocalizedMessage());
         }
     }
 
@@ -67,7 +67,7 @@ public class ConsoleUI {
         try {
             libraryService.showReaders();
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to find all readers due to DB error: " + e.getLocalizedMessage());
         }
     }
 
@@ -75,11 +75,10 @@ public class ConsoleUI {
         System.out.println("Please enter new reader full name!");
         String input = scanner.nextLine();
         try {
-            if (libraryService.addReader(input) != null) {
-                System.out.println("Reader added successfully");
-            }
+            libraryService.addReader(input);
+            System.out.println("Reader added successfully");
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to save new reader: " + e.getLocalizedMessage());
         }
     }
 
@@ -87,11 +86,10 @@ public class ConsoleUI {
         System.out.println("Please enter new book name and author separated by “/”. Like this: name / author");
         String input = scanner.nextLine();
         try {
-            if (libraryService.addBook(input) != null) {
-                System.out.println("Book added successfully");
-            }
+            libraryService.addBook(input);
+            System.out.println("Book added successfully");
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to save new book: " + e.getLocalizedMessage());
         }
     }
 
@@ -99,11 +97,10 @@ public class ConsoleUI {
         System.out.println("Please enter bookId and readerId separated by “/” for borrow. Like this: bookId / readerId");
         String input = scanner.nextLine();
         try {
-            if (libraryService.borrowBook(input)) {
-                System.out.println("Book successfully borrowed");
-            }
+            libraryService.borrowBook(input);
+            System.out.println("Book successfully borrowed");
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to borrow book for reader: " + e.getLocalizedMessage());
         }
     }
 
@@ -111,11 +108,10 @@ public class ConsoleUI {
         System.out.println("Please enter bookId and readerId to return the book to the library. Like this: bookId / readerId");
         String input = scanner.nextLine();
         try {
-            if (libraryService.returnBookToLibrary(input)) {
-                System.out.println("Book successfully returned");
-            }
+            libraryService.returnBookToLibrary(input);
+            System.out.println("Book successfully returned");
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to return book: " + e.getLocalizedMessage());
         }
     }
 
@@ -125,7 +121,7 @@ public class ConsoleUI {
         try {
             libraryService.showAllBorrowedBooksByReader(input);
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to find all borrowed books by reader Id: " + e.getLocalizedMessage());
         }
     }
 
@@ -133,9 +129,9 @@ public class ConsoleUI {
         System.out.println("Please enter bookId");
         String input = scanner.nextLine();
         try {
-            libraryService.showReadersByCurrentBook(input);
+            libraryService.showAllReadersByCurrentBook(input);
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to find all readers by book Id: " + e.getLocalizedMessage());
         }
     }
 
@@ -143,7 +139,7 @@ public class ConsoleUI {
         try {
             libraryService.showAllReadersAndBorrowedBooks();
         } catch (RuntimeException e) {
-            System.err.println(e.getLocalizedMessage());
+            System.err.println("Failed to find all readers and borrowed books due to DB error: " + e.getLocalizedMessage());
         }
     }
 }

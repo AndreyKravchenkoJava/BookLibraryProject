@@ -14,8 +14,6 @@ import java.util.Optional;
 
 public class BookDaoPostgresqlImpl implements BookDao {
 
-    //ЗАКРОЙ РЕЗУЛЬТ СЕТЫ
-
     @Override
     public Book save(Book book) {
         final String SQL_SAVE_BOOK = "INSERT INTO book(title, author) VALUES(?,?)";
@@ -27,7 +25,6 @@ public class BookDaoPostgresqlImpl implements BookDao {
             preparedStatement.setString(2, book.getAuthor());
             preparedStatement.execute();
 
-
             ResultSet resultSet = preparedStatement.getGeneratedKeys();
 
             if (resultSet.next()) {
@@ -38,9 +35,7 @@ public class BookDaoPostgresqlImpl implements BookDao {
                 throw new JdbcDaoException("Failed to fetch generated ID from DB while saving new book");
             }
 
-
         } catch (SQLException e) {
-            System.err.println("Failed to save new book due to DB error: " + e.getLocalizedMessage());
             throw new JdbcDaoException(e);
         }
     }
@@ -59,13 +54,13 @@ public class BookDaoPostgresqlImpl implements BookDao {
 
             while (resultSet.next()) {
                 book = mapToBook(resultSet);
-                return Optional.ofNullable(book);
+                return Optional.of(book);
             }
 
             resultSet.close();
 
         } catch (SQLException e) {
-            System.err.println("Failed to find book by Id due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return Optional.empty();
     }
@@ -87,7 +82,7 @@ public class BookDaoPostgresqlImpl implements BookDao {
             resultSet.close();
 
         } catch (SQLException e) {
-            System.err.println("Failed to find all books due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return bookList;
     }
@@ -105,7 +100,7 @@ public class BookDaoPostgresqlImpl implements BookDao {
             book.setAuthor(author);
 
         } catch (SQLException e) {
-            System.err.println("Failed to read all books due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return book;
     }

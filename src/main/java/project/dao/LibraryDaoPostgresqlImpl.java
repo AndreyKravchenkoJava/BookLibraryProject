@@ -25,7 +25,7 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
             flag = preparedStatement.execute();
 
         } catch (SQLException e) {
-            System.err.println("Failed to borrow book for reader due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return flag;
     }
@@ -46,11 +46,10 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
             if (amount > 0) {
                 flag = true;
             } else {
-                throw new JdbcDaoException("Failed to return this book: no such borrowing exists");
+                throw new JdbcDaoException("no such borrowing exists");
             }
 
         } catch (SQLException e) {
-            System.err.println("Failed to return book due to DB error: " + e.getLocalizedMessage());
             throw new JdbcDaoException(e);
         }
         return flag;
@@ -77,7 +76,7 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
             resultSet.close();
 
         } catch (SQLException e) {
-            System.err.println("Failed to find all borrowed books by reader Id due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return bookList;
     }
@@ -104,7 +103,7 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
             resultSet.close();
 
         } catch (SQLException e) {
-            System.err.println("Failed to find all readers by book Id due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return readerList;
     }
@@ -137,7 +136,7 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
             resultSet.close();
 
         } catch (SQLException e) {
-            System.err.println("Failed to find all readers and borrowed books due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return readerListMap;
     }
@@ -153,7 +152,7 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
             reader.setName(name);
 
         } catch (SQLException e) {
-            System.err.println("Failed to read reader due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return reader;
     }
@@ -171,7 +170,7 @@ public class LibraryDaoPostgresqlImpl implements LibraryDao {
             book.setAuthor(author);
 
         } catch (SQLException e) {
-            System.err.println("Failed to read all books due to DB error: " + e.getLocalizedMessage());
+            throw new JdbcDaoException(e);
         }
         return book;
     }
