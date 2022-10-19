@@ -13,7 +13,7 @@ public class ValidatorService {
         if (input == null || input.length() == 0) {
             throw new ValidatorServiceException("input cannot be empty!");
         } else if (StringUtils.countMatches(input, " / ") != 1) {
-            throw new LibraryServiceException("input should be separated ' / '!");
+            throw new ValidatorServiceException("input should be separated ' / '!");
         }
         return true;
     }
@@ -30,14 +30,7 @@ public class ValidatorService {
         Matcher matcher = pattern.matcher(name);
 
         if (!matcher.find()) {
-            throw new ValidatorServiceException("""
-                    invalid name!
-                                            
-                    1. Name must contain only letters
-                    2. Have more than two letters
-                    3. Maximum number of letters 100
-                                            
-                    Fro example 'Danyl Zanuk'""");
+            throw new ValidatorServiceException("invalid name! 1.Name must contain only letters 2.Have more than two letters 3.You must write the name as in the example 'Danil Zanuk'");
         }
         return true;
     }
@@ -47,14 +40,7 @@ public class ValidatorService {
         Matcher matcher = pattern.matcher(input);
 
         if (!matcher.find()) {
-            throw new ValidatorServiceException("""                       
-                    invalid input!
-                                            
-                    1. The input cannot be empty
-                    2. You must enter only number
-                    3. The input must match the example
-
-                    Fro example '5'""");
+            throw new ValidatorServiceException("invalid input! 1.The input cannot be empty 2.You must enter only number 3.You must write the input as in the example '5'");
         }
         return true;
     }
@@ -64,15 +50,7 @@ public class ValidatorService {
         Matcher matcher = pattern.matcher(input);
 
         if (!matcher.find()) {
-            throw new ValidatorServiceException("""                       
-                    invalid input!
-                                            
-                    1. The input cannot be empty
-                    2. Input should be separated ' / '
-                    2. You must enter only numbers
-                    3. The input must match the example
-
-                    Fro example '50 / 50'""");
+            throw new ValidatorServiceException("invalid input! 1.The input cannot be empty 2.Input should be separated ' / ' 3.You must enter only numbers 4.You must write the input as in the example '50 / 50'");
         }
         return true;
     }

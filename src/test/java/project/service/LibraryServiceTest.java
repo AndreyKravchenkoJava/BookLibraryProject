@@ -43,7 +43,7 @@ class LibraryServiceTest {
         when(bookDao.findAll()).thenReturn(booksListToCreate);
         libraryService.showBooks();
 
-        assertThat(verify(bookDao, times(2)).findAll());
+        verify(bookDao, times(2)).findAll();
     }
 
     @DisplayName("Test should fail to show books with no books in the library")
@@ -54,7 +54,7 @@ class LibraryServiceTest {
         when(bookDao.findAll()).thenReturn(booksListToCreate);
         libraryService.showBooks();
 
-        assertThat(verify(bookDao, times(1)).findAll());
+        verify(bookDao, times(1)).findAll();
     }
 
     @DisplayName("Test should successfully to show readers in library")
@@ -65,7 +65,7 @@ class LibraryServiceTest {
         when(readerDao.findAll()).thenReturn(readersListToCreate);
         libraryService.showReaders();
 
-        assertThat(verify(readerDao, times(2)).findAll());
+        verify(readerDao, times(2)).findAll();
     }
 
     @DisplayName("Test should fail to show reader with no readers in the library")
@@ -76,7 +76,7 @@ class LibraryServiceTest {
         when(readerDao.findAll()).thenReturn(readersListToCreate);
         libraryService.showReaders();
 
-        assertThat(verify(readerDao, times(1)).findAll());
+        verify(readerDao, times(1)).findAll();
     }
 
     @DisplayName("Test should successfully add new book")
@@ -85,20 +85,18 @@ class LibraryServiceTest {
         String expectedTitle = "My life, my achievements";
         String expectedAuthor = "Henry Ford";
         String userInput = expectedTitle + " / " + expectedAuthor;
-        Book bookToCreate = new Book(0, expectedTitle, expectedAuthor);
+        Book bookToCreate = new Book(expectedTitle, expectedAuthor);
 
 
         when(bookDao.save(any())).thenReturn(bookToCreate);
         Book createdBook = libraryService.addBook(userInput);
         ArgumentCaptor<Book> captor = ArgumentCaptor.forClass(Book.class);
         verify(bookDao, times(1)).save(captor.capture());
-        Book bookToSave = captor.getValue();
 
         assertAll(
                 () -> assertThat(createdBook).isNotNull(),
                 () -> assertThat(expectedTitle).isEqualTo(createdBook.getTitle()),
-                () -> assertThat(expectedAuthor).isEqualTo(createdBook.getAuthor()),
-                () -> assertThat(createdBook).isEqualTo(bookToSave)
+                () -> assertThat(expectedAuthor).isEqualTo(createdBook.getAuthor())
         );
     }
 
@@ -121,7 +119,7 @@ class LibraryServiceTest {
         String userInput = expectedTitle + " " + expectedAuthor;
         String expectedErrorMessage = "input should be separated ' / '!";
 
-        var exception = assertThrows(LibraryServiceException.class, () -> libraryService.addBook(userInput));
+        var exception = assertThrows(ValidatorServiceException.class, () -> libraryService.addBook(userInput));
 
         assertThat(expectedErrorMessage).isEqualTo(exception.getLocalizedMessage());
     }
@@ -132,14 +130,7 @@ class LibraryServiceTest {
         String expectedTitle = "My life, my achievements";
         String expectedAuthor = "Henry Ford 33333";
         String userInput = expectedTitle + " / " + expectedAuthor;
-        String expectedErrorMessage = """
-                invalid name!
-                                        
-                1. Name must contain only letters
-                2. Have more than two letters
-                3. Maximum number of letters 100
-                                        
-                Fro example 'Danyl Zanuk'""";
+        String expectedErrorMessage = "invalid name! 1.Name must contain only letters 2.Have more than two letters 3.You must write the name as in the example 'Danil Zanuk'";
 
 
         var exception = assertThrows(ValidatorServiceException.class, () -> libraryService.addBook(userInput));
@@ -166,18 +157,16 @@ class LibraryServiceTest {
     @Test
     void shouldSuccessfullyToAddNewReader() {
         String userInput = "Alexander Singeev";
-        Reader readerToCreate = new Reader(0, userInput);
+        Reader readerToCreate = new Reader(userInput);
 
         when(readerDao.save(any())).thenReturn(readerToCreate);
         Reader createdReader = libraryService.addReader(userInput);
         ArgumentCaptor<Reader> captor = ArgumentCaptor.forClass(Reader.class);
         verify(readerDao, times(1)).save(captor.capture());
-        Reader readerToSave = captor.getValue();
 
         assertAll(
                 () -> assertThat(createdReader).isNotNull(),
-                () -> assertThat(userInput).isEqualTo(createdReader.getName()),
-                () -> assertThat(createdReader).isEqualTo(readerToSave)
+                () -> assertThat(userInput).isEqualTo(createdReader.getName())
         );
     }
 
@@ -196,14 +185,7 @@ class LibraryServiceTest {
     @Test
     void shouldFailToAddNewReaderWithInvalidName() {
         String userInput = "Alexander Singeev 1";
-        String expectedErrorMessage = """                       
-                invalid name!
-                                        
-                1. Name must contain only letters
-                2. Have more than two letters
-                3. Maximum number of letters 100
-                                        
-                Fro example 'Danyl Zanuk'""";
+        String expectedErrorMessage = "invalid name! 1.Name must contain only letters 2.Have more than two letters 3.You must write the name as in the example 'Danil Zanuk'";
 
 
         var exception = assertThrows(ValidatorServiceException.class, () -> libraryService.addReader(userInput));
@@ -256,15 +238,7 @@ class LibraryServiceTest {
     @Test
     void shouldFailToBorrowBookWithInvalidInput() {
         String userInput = "a / b";
-        String expectedErrorMessage = """                       
-                invalid input!
-                                        
-                1. The input cannot be empty
-                2. Input should be separated ' / '
-                2. You must enter only numbers
-                3. The input must match the example
-
-                Fro example '50 / 50'""";
+        String expectedErrorMessage = "invalid input! 1.The input cannot be empty 2.Input should be separated ' / ' 3.You must enter only numbers 4.You must write the input as in the example '50 / 50'";
 
         var exception = assertThrows(ValidatorServiceException.class, () -> libraryService.borrowBook(userInput));
 
@@ -316,15 +290,7 @@ class LibraryServiceTest {
     @Test
     void shouldFailToReturnBookToLibraryWithInvalidInput() {
         String userInput = "a / b";
-        String expectedErrorMessage = """                       
-                invalid input!
-                                        
-                1. The input cannot be empty
-                2. Input should be separated ' / '
-                2. You must enter only numbers
-                3. The input must match the example
-
-                Fro example '50 / 50'""";
+        String expectedErrorMessage = "invalid input! 1.The input cannot be empty 2.Input should be separated ' / ' 3.You must enter only numbers 4.You must write the input as in the example '50 / 50'";
 
         var exception = assertThrows(ValidatorServiceException.class, () -> libraryService.returnBookToLibrary(userInput));
 
@@ -376,24 +342,17 @@ class LibraryServiceTest {
         when(libraryDao.findAllBorrowedBooksByReaderId(expectedReaderId)).thenReturn(booksListToCreate);
         libraryService.showAllBorrowedBooksByReader(userInput);
 
-        assertAll(
-                () -> verify(readerDao, times(1)).findById(expectedReaderId),
-                () -> verify(libraryDao, times(2)).findAllBorrowedBooksByReaderId(expectedReaderId)
-        );
+
+        verify(readerDao, times(1)).findById(expectedReaderId);
+        verify(libraryDao, times(2)).findAllBorrowedBooksByReaderId(expectedReaderId);
+
     }
 
     @DisplayName("Test should fail to show all borrowed books by reader with invalid input")
     @Test
     void shouldFailToShowAllBorrowedBooksByReaderWithInvalidInput() {
         String userInput = "a";
-        String expectedErrormessage = """                       
-                invalid input!
-                                        
-                1. The input cannot be empty
-                2. You must enter only number
-                3. The input must match the example
-
-                Fro example '5'""";
+        String expectedErrormessage = "invalid input! 1.The input cannot be empty 2.You must enter only number 3.You must write the input as in the example '5'";
 
         var exception = assertThrows(ValidatorServiceException.class, () -> libraryService.showAllBorrowedBooksByReader(userInput));
 
@@ -423,7 +382,7 @@ class LibraryServiceTest {
         when(libraryDao.findAllBorrowedBooksByReaderId(expectedReaderId)).thenReturn(booksListToCreate);
         libraryService.showAllBorrowedBooksByReader(userInput);
 
-        assertThat(verify(libraryDao, times(1)).findAllBorrowedBooksByReaderId(expectedReaderId));
+        verify(libraryDao, times(1)).findAllBorrowedBooksByReaderId(expectedReaderId);
 
     }
 
@@ -440,24 +399,16 @@ class LibraryServiceTest {
         when(libraryDao.findAllReadersByBookId(expectedBookId)).thenReturn(readerListToSave);
         libraryService.showAllReadersByCurrentBook(userInput);
 
-        assertAll(
-                () -> verify(bookDao, times(1)).findById(expectedBookId),
-                () -> verify(libraryDao, times(2)).findAllReadersByBookId(expectedBookId)
-        );
+        verify(bookDao, times(1)).findById(expectedBookId);
+        verify(libraryDao, times(2)).findAllReadersByBookId(expectedBookId);
+
     }
 
     @DisplayName("Test should fail to show all readers by current book with invalid input")
     @Test
     void shouldFailToShowAllReadersByCurrentBookWithInvalidInput() {
         String userInput = "a";
-        String expectedErrormessage = """                       
-                invalid input!
-                                        
-                1. The input cannot be empty
-                2. You must enter only number
-                3. The input must match the example
-
-                Fro example '5'""";
+        String expectedErrormessage = "invalid input! 1.The input cannot be empty 2.You must enter only number 3.You must write the input as in the example '5'";
 
         var exception = assertThrows(ValidatorServiceException.class, () -> libraryService.showAllReadersByCurrentBook(userInput));
 
@@ -487,7 +438,7 @@ class LibraryServiceTest {
         when(libraryDao.findAllReadersByBookId(expectedBookId)).thenReturn(readerListToCreate);
         libraryService.showAllReadersByCurrentBook(userInput);
 
-        assertThat(verify(libraryDao, times(1)).findAllReadersByBookId(expectedBookId));
+        verify(libraryDao, times(1)).findAllReadersByBookId(expectedBookId);
     }
 
     @DisplayName("Test should successfully to show all readers and borrowed books")
@@ -503,7 +454,7 @@ class LibraryServiceTest {
         when(libraryDao.findAllReadersAndBorrowedBooks()).thenReturn(readerBooksMapToCreate);
         libraryService.showAllReadersAndBorrowedBooks();
 
-        assertThat(verify(libraryDao, times(2)).findAllReadersAndBorrowedBooks());
+        verify(libraryDao, times(2)).findAllReadersAndBorrowedBooks();
 
     }
 
@@ -515,7 +466,6 @@ class LibraryServiceTest {
         when(libraryDao.findAllReadersAndBorrowedBooks()).thenReturn(readerBooksMapToCreate);
         libraryService.showAllReadersAndBorrowedBooks();
 
-        assertThat(verify(libraryDao, times(1)).findAllReadersAndBorrowedBooks());
-
+        verify(libraryDao, times(1)).findAllReadersAndBorrowedBooks();
     }
 }
