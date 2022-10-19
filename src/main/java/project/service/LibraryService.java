@@ -3,101 +3,132 @@ package project.service;
 import project.dao.*;
 import project.entity.Book;
 import project.entity.Reader;
+import project.exception.LibraryServiceException;
 
-import java.util.Arrays;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 
 public class LibraryService {
-    private LibraryDAO libraryDAO = new LibraryDAO();
-    private BookDAO bookDAO = new BookDAO();
-    private ReaderDAO readerDAO = new ReaderDAO();
+    private LibraryDao libraryDao = new LibraryDaoPostgresqlImpl();
+    private BookDao bookDao = new BookDaoPostgresqlImpl();
+    private ReaderDao readerDao = new ReaderDaoPostgresqlImpl();
 
     public void showBooks() {
-        bookDAO.findAll().forEach(System.out::println);
+        if (!bookDao.findAll().isEmpty()) {
+            bookDao.findAll().forEach(System.out::println);
+        } else {
+            System.out.println("There are no books in the Library");
+        }
     }
 
     public void showReaders() {
-        readerDAO.findAll().forEach(System.out::println);
-    }
-
-    public void addBook() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Please enter new book name and author separated by “/”. Like this: name / author");
-
-        String input = scanner.nextLine();
-        String[] nameAndAuthorArray = input.split(" / ");
-
-        Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
-        Matcher matcher = pattern.matcher(nameAndAuthorArray[1]);
-
-        if (matcher.find()) {
-            bookDAO.save(new Book(nameAndAuthorArray[0], nameAndAuthorArray[1]));
+        if (!readerDao.findAll().isEmpty()) {
+            readerDao.findAll().forEach(System.out::println);
         } else {
-            System.out.println("Name must contain only letters and have more than two letters");
+            System.out.println("There are no readers in the Library");
         }
     }
 
-    public void addReaders() {
-        System.out.println("Please enter new reader full name!");
-        Scanner scanner = new Scanner(System.in);
+    public Book addBook(String input) {
+        ValidatorService.isInputAddBookValid(input);
 
-        String input = scanner.nextLine();
+        String[] titleAndAuthorArray = input.split(" / ");
+        String title = titleAndAuthorArray[0];
+        String author = titleAndAuthorArray[1];
 
-        Pattern pattern = Pattern.compile("^[a-zA-Z\\s]{2,}$");
-        Matcher matcher = pattern.matcher(input);
+        ValidatorService.isNameReaderOrAuthorValid(author);
 
-        if (matcher.find()) {
-            readerDAO.save(new Reader(input));
-        } else {
-            System.out.println("Name must contain only letters and have more than two letters");
-        }
+        Book book = new Book(title, author);
+        return bookDao.save(book);
     }
 
-    public void borrowBook() {
-        System.out.println("Please enter bookId and readerId separated by “/” for borrow. Like this: bookId / readerId");
+    public Reader addReader(String input) {
+        ValidatorService.isInputAddReaderValid(input);
 
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
+        ValidatorService.isNameReaderOrAuthorValid(input);
+
+        Reader reader = new Reader(input);
+        return readerDao.save(reader);
+
+    }
+
+    public boolean borrowBook(String input) {
+        ValidatorService.isTwoIdValid(input);
+
         int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
         int bookId = arrayIndicators[0];
         int readerId = arrayIndicators[1];
 
-        libraryDAO.borrowBookIdToReaderId(bookId, readerId);
+        if (bookDao.findById(bookId).isPresent() && readerDao.findById(readerId).isPresent()) {
+            return libraryDao.borrowBookIdToReaderId(bookId, readerId);
+        } else {
+            throw new LibraryServiceException("there is no such book or reader in the Library!");
+        }
     }
 
-    public void returnBookToLibrary() {
-        System.out.println("Please enter bookId and readerId to return the book to the library. Like this: bookId / readerId");
+    public boolean returnBookToLibrary(String input) {
+        ValidatorService.isTwoIdValid(input);
 
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        int[] bookIDAndReaderId = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
-        int bookId = bookIDAndReaderId[0];
-        int readerId= bookIDAndReaderId[1];
+        int[] arrayIndicators = Arrays.stream(input.split(" / ")).mapToInt(Integer::parseInt).toArray();
+        int bookId = arrayIndicators[0];
+        int readerId = arrayIndicators[1];
 
-        libraryDAO.returnBookIdFromReaderId(bookId, readerId);
+        if (bookDao.findById(bookId).isPresent() && readerDao.findById(readerId).isPresent()) {
+            return libraryDao.returnByBookIdAndReaderId(bookId, readerId);
+        } else {
+            throw new LibraryServiceException("there is no such book or reader in the Library!");
+        }
     }
 
-    public void showAllBorrowedBooksUser() {
-        System.out.println("Please enter readerID");
+    public void showAllBorrowedBooksByReader(String input) {
+        ValidatorService.isOneIdValid(input);
 
-        Scanner scanner = new Scanner(System.in);
-        int input = scanner.nextInt();
+        int readerId = Integer.parseInt(input);
 
-        libraryDAO.findAllBorrowedBooksByReaderId(input).forEach(System.out::println);
+        if (readerDao.findById(readerId).isEmpty()) {
+            throw new LibraryServiceException("there is no such reader in the Library");
+        }
+
+        if (!libraryDao.findAllBorrowedBooksByReaderId(readerId).isEmpty()) {
+            libraryDao.findAllBorrowedBooksByReaderId(readerId).forEach(System.out::println);
+        } else {
+            System.out.println("This reader did not borrow books");
+        }
     }
 
-    public void showReadersCurrentBook() {
-        System.out.println("Please enter bookId");
+    public void showAllReadersByCurrentBook(String input) {
+        ValidatorService.isOneIdValid(input);
 
-        Scanner scanner = new Scanner(System.in);
-        int input = scanner.nextInt();
+        int bookId = Integer.parseInt(input);
 
-        libraryDAO.findAllReadersByBookId(input).forEach(System.out::println);
+        if (bookDao.findById(bookId).isEmpty()) {
+            throw new LibraryServiceException("there is no such book in the Library");
+        }
+
+        if (!libraryDao.findAllReadersByBookId(bookId).isEmpty()) {
+            libraryDao.findAllReadersByBookId(bookId).forEach(System.out::println);
+        } else {
+            System.out.println("This book was not borrowed by readers");
+        }
+
     }
 
-    public void showAllReadersAndBorrowedBook() {
-        libraryDAO.findAllReadersAndBorrowedBooks().forEach((k, v) -> System.out.println(k + " : " + v));
+    public void showAllReadersAndBorrowedBooks() {
+        if (!libraryDao.findAllReadersAndBorrowedBooks().isEmpty()) {
+            libraryDao.findAllReadersAndBorrowedBooks().forEach((r, b) -> System.out.println(r + " : " + b));
+        } else {
+            System.out.println("Not one reader borrowed a books");
+        }
+    }
+
+    public void setLibraryDao(LibraryDao libraryDao) {
+        this.libraryDao = libraryDao;
+    }
+
+    public void setBookDao(BookDao bookDao) {
+        this.bookDao = bookDao;
+    }
+
+    public void setReaderDao(ReaderDao readerDao) {
+        this.readerDao = readerDao;
     }
 }

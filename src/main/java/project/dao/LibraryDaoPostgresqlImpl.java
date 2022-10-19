@@ -3,35 +3,37 @@ package project.dao;
 import project.connector.ConnectionCreator;
 import project.entity.Book;
 import project.entity.Reader;
+import project.exception.JdbcDaoException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public class LibraryDAO {
+public class LibraryDaoPostgresqlImpl implements LibraryDao {
 
-    public boolean borrowBookIdToReaderId(int bookID, int readerId) {
+    @Override
+    public boolean borrowBookIdToReaderId(int bookId, int readerId) {
         boolean flag = false;
         final String SQL_SAVE_BORROWING = "INSERT INTO book_reader(book_id, reader_id) VALUES(?,?)";
 
         try (var connection = ConnectionCreator.createConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_SAVE_BORROWING)) {
 
-            preparedStatement.setInt(1, bookID);
+            preparedStatement.setInt(1, bookId);
             preparedStatement.setInt(2, readerId);
-            preparedStatement.execute();
+            flag = preparedStatement.execute();
 
-            flag = true;
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            throw new JdbcDaoException(e);
         }
         return flag;
     }
 
-    public boolean returnBookIdFromReaderId(int bookId, int readerId) {
+    @Override
+    public boolean returnByBookIdAndReaderId(int bookId, int readerId) {
         boolean flag = false;
+        int amount;
         final String SQL_DELETE_BORROWING = "DELETE FROM book_reader WHERE book_id = (?) AND reader_id = (?)";
 
         try (var connection = ConnectionCreator.createConnection();
@@ -39,16 +41,21 @@ public class LibraryDAO {
 
             preparedStatement.setInt(1, bookId);
             preparedStatement.setInt(2, readerId);
-            preparedStatement.executeUpdate();
+            amount = preparedStatement.executeUpdate();
 
-            flag = true;
+            if (amount > 0) {
+                flag = true;
+            } else {
+                throw new JdbcDaoException("no such borrowing exists");
+            }
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            throw new JdbcDaoException(e);
         }
         return flag;
     }
 
+    @Override
     public List<Book> findAllBorrowedBooksByReaderId(int readerId) {
         List<Book> bookList = new ArrayList<>();
         final String SQL_GET_READER_BORROWED_BOOK = "SELECT book.id AS book_id, book.title, book.author FROM book \n" +
@@ -66,12 +73,15 @@ public class LibraryDAO {
                 bookList.add(mapToBook(resultSet));
             }
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            resultSet.close();
+
+        } catch (SQLException e) {
+            throw new JdbcDaoException(e);
         }
         return bookList;
     }
 
+    @Override
     public List<Reader> findAllReadersByBookId(int bookId) {
         List<Reader> readerList = new ArrayList<>();
         final String SQL_GET_READERS_BY_CURRENT_BOOK = "SELECT reader.id, reader.name FROM reader JOIN book_reader\n" +
@@ -90,12 +100,15 @@ public class LibraryDAO {
                 readerList.add(mapToReader(resultSet));
             }
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            resultSet.close();
+
+        } catch (SQLException e) {
+            throw new JdbcDaoException(e);
         }
         return readerList;
     }
 
+    @Override
     public Map<Reader, List<Book>> findAllReadersAndBorrowedBooks() {
         Map<Reader, List<Book>> readerListMap = new HashMap<>();
         final String SQL_GET_ALL_READERS_AND_BORROWED_BOOK = "SELECT reader.id, reader.name, book.id AS book_id, book.title, book.author \n" +
@@ -107,12 +120,11 @@ public class LibraryDAO {
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
-
             while (resultSet.next()) {
                 Reader reader = mapToReader(resultSet);
                 Book book = mapToBook(resultSet);
 
-                if (readerListMap.keySet().contains(reader)) {
+                if (readerListMap.containsKey(reader)) {
                     readerListMap.get(reader).add(book);
                 } else {
                     List<Book> books = new ArrayList<>();
@@ -121,8 +133,10 @@ public class LibraryDAO {
                 }
             }
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            resultSet.close();
+
+        } catch (SQLException e) {
+            throw new JdbcDaoException(e);
         }
         return readerListMap;
     }
@@ -137,8 +151,8 @@ public class LibraryDAO {
             reader.setId(id);
             reader.setName(name);
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            throw new JdbcDaoException(e);
         }
         return reader;
     }
@@ -155,8 +169,8 @@ public class LibraryDAO {
             book.setTitle(title);
             book.setAuthor(author);
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            throw new JdbcDaoException(e);
         }
         return book;
     }
