@@ -7,7 +7,5 @@ public class MainClass {
         ConsoleUI consoleUI = new ConsoleUI();
 
         consoleUI.run();
-
-        //level 5
     }
 }
